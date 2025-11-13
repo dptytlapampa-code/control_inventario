@@ -1,0 +1,9 @@
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+CREATE DATABASE inventario_db;
+CREATE USER inventario WITH ENCRYPTED PASSWORD 'inventariopass';
+GRANT ALL PRIVILEGES ON DATABASE inventario_db TO inventario;
+
+CREATE DATABASE keycloak;
+CREATE USER keycloak WITH ENCRYPTED PASSWORD 'keycloakpass';
+GRANT ALL PRIVILEGES ON DATABASE keycloak TO keycloak;
