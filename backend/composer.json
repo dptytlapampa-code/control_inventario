@@ -1,0 +1,11 @@
+{
+    "name": "control/inventario",
+    "description": "Laravel base skeleton",
+    "type": "project",
+    "require": {},
+    "autoload": {
+        "psr-4": {
+            "App\\": "app/"
+        }
+    }
+}
