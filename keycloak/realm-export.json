@@ -1,0 +1,67 @@
+{
+  "realm": "control-inventario",
+  "enabled": true,
+  "displayName": "Control de Inventario",
+  "users": [
+    {
+      "username": "admin",
+      "enabled": true,
+      "emailVerified": false,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "adminpass"
+        }
+      ],
+      "realmRoles": [
+        "superadmin"
+      ]
+    }
+  ],
+  "roles": {
+    "realm": [
+      {
+        "name": "superadmin",
+        "description": "Acceso total al sistema"
+      },
+      {
+        "name": "admin",
+        "description": "Acceso completo a su institución"
+      },
+      {
+        "name": "tecnico",
+        "description": "Carga operativa y movimientos"
+      }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "frontend-app",
+      "protocol": "openid-connect",
+      "publicClient": true,
+      "redirectUris": [
+        "http://localhost/*"
+      ],
+      "webOrigins": [
+        "*"
+      ],
+      "directAccessGrantsEnabled": true,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "serviceAccountsEnabled": false,
+      "fullScopeAllowed": true
+    },
+    {
+      "clientId": "backend-api",
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "secret": "backend-secret-key",
+      "serviceAccountsEnabled": true,
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "redirectUris": [],
+      "webOrigins": [],
+      "fullScopeAllowed": true
+    }
+  ]
+}
