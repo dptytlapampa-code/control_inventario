@@ -7,3 +7,11 @@ Route::middleware(['auth:keycloak', 'role:superadmin'])->group(function () {
     Route::put('/tipos-institucion/{id}', [\App\Http\Controllers\TipoInstitucionController::class, 'update']);
     Route::delete('/tipos-institucion/{id}', [\App\Http\Controllers\TipoInstitucionController::class, 'destroy']);
 });
+
+Route::middleware(['auth:keycloak', 'role:superadmin'])->group(function () {
+    Route::get('/instituciones', [\App\Http\Controllers\InstitucionController::class, 'index']);
+    Route::post('/instituciones', [\App\Http\Controllers\InstitucionController::class, 'store']);
+    Route::get('/instituciones/{id}', [\App\Http\Controllers\InstitucionController::class, 'show']);
+    Route::put('/instituciones/{id}', [\App\Http\Controllers\InstitucionController::class, 'update']);
+    Route::delete('/instituciones/{id}', [\App\Http\Controllers\InstitucionController::class, 'destroy']);
+});
