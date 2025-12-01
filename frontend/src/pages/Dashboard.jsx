@@ -1,10 +1,17 @@
-import React from 'react'
+import Card from '../components/Card'
 
-const Dashboard = () => {
+function Dashboard() {
   return (
-    <section className="hero">
-      <h1>Bienvenido al Sistema de Inventario</h1>
-      <p>Explora y gestiona tu inventario desde este panel.</p>
+    <section className="space-y-4">
+      <div>
+        <h1 className="text-2xl font-semibold text-slate-900">Dashboard</h1>
+        <p className="text-sm text-slate-600">Resumen general del inventario.</p>
+      </div>
+      <Card>
+        <div className="h-24 flex items-center justify-center text-slate-500">
+          Contenido del dashboard pendiente de implementar.
+        </div>
+      </Card>
     </section>
   )
 }
