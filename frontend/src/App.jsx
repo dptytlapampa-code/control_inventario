@@ -3,6 +3,7 @@ import MainLayout from './layout/MainLayout'
 import Dashboard from './pages/Dashboard'
 import InstitucionesList from './pages/InstitucionesList'
 import InstitucionesServicios from './pages/InstitucionesServicios'
+import InstitucionesOficinas from './pages/InstitucionesOficinas'
 import PageTemplate from './pages/PageTemplate'
 
 function App() {
@@ -20,9 +21,10 @@ function App() {
             element={<InstitucionesServicios />}
           />
           <Route
-            path="oficinas"
-            element={<PageTemplate title="Oficinas" description="Gestión y detalle de oficinas." />}
+            path="instituciones/oficinas"
+            element={<InstitucionesOficinas />}
           />
+          <Route path="oficinas" element={<Navigate to="/instituciones/oficinas" replace />} />
           <Route
             path="equipos/listado"
             element={<PageTemplate title="Equipos" description="Inventario y estado de equipos." />}
