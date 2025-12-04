@@ -2,6 +2,7 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import MainLayout from './layout/MainLayout'
 import Dashboard from './pages/Dashboard'
 import InstitucionesList from './pages/InstitucionesList'
+import InstitucionesServicios from './pages/InstitucionesServicios'
 import PageTemplate from './pages/PageTemplate'
 
 function App() {
@@ -16,7 +17,7 @@ function App() {
           />
           <Route
             path="instituciones/servicios"
-            element={<PageTemplate title="Servicios de instituciones" description="Servicios activos por institución." />}
+            element={<InstitucionesServicios />}
           />
           <Route
             path="oficinas"
