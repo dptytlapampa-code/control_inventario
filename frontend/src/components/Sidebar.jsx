@@ -42,7 +42,7 @@ const MENU_STRUCTURE = [
     children: [
       { label: 'Listado', path: '/instituciones/listado', icon: Landmark },
       { label: 'Servicios', path: '/instituciones/servicios', icon: Stethoscope },
-      { label: 'Oficinas', path: '/instituciones/oficinas', icon: Building2 },
+      { label: 'Oficinas', path: '/instituciones/oficinas', icon: Landmark },
     ],
   },
   {
