@@ -7,6 +7,7 @@ import InstitucionesOficinas from './pages/InstitucionesOficinas'
 import PageTemplate from './pages/PageTemplate'
 import EquiposTipos from './pages/EquiposTipos'
 import EquiposTiposForm from './pages/EquiposTiposForm'
+import Asignaciones from './pages/Asignaciones'
 
 function App() {
   return (
@@ -42,7 +43,7 @@ function App() {
           />
           <Route
             path="asignaciones"
-            element={<PageTemplate title="Asignaciones" description="Relación entre equipos, servicios y responsables." />}
+            element={<Asignaciones />}
           />
           <Route
             path="mantenimientos/historial"
