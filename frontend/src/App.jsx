@@ -9,6 +9,7 @@ import EquiposTipos from './pages/EquiposTipos'
 import EquiposTiposForm from './pages/EquiposTiposForm'
 import Asignaciones from './pages/Asignaciones'
 import EquiposList from './pages/EquiposList'
+import EquipoDetalle from './pages/EquipoDetalle'
 
 function App() {
   return (
@@ -33,6 +34,7 @@ function App() {
             path="equipos/listado"
             element={<EquiposList />}
           />
+          <Route path="equipos/:equipoId" element={<EquipoDetalle />} />
           <Route
             path="equipos/tipos"
             element={<EquiposTipos />}

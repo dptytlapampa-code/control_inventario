@@ -9,6 +9,7 @@ import {
   Settings,
   Trash2,
 } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 import StatusBadge from './StatusBadge'
 import Table from './Table'
 
@@ -21,6 +22,7 @@ const typeIcons = {
 }
 
 function EquipmentTable({ data = [] }) {
+  const navigate = useNavigate()
   const columns = [
     {
       key: 'tipo',
@@ -63,11 +65,22 @@ function EquipmentTable({ data = [] }) {
       render: (row) => <StatusBadge status={row.estado} />,
     },
     {
+      key: 'detalle',
+      label: 'Detalle',
+      render: (row) => (
+        <ActionButton
+          icon={<Eye size={16} />}
+          label="Ver detalle"
+          onClick={() => navigate(`/equipos/${row.id}`)}
+        />
+      ),
+    },
+    {
       key: 'acciones',
       label: 'Acciones',
       render: (row) => (
         <div className="flex flex-wrap gap-2 text-slate-500">
-          <ActionButton icon={<Eye size={16} />} label="Ver" onClick={() => console.log('Ver', row.id)} />
+          <ActionButton icon={<Eye size={16} />} label="Ver" onClick={() => navigate(`/equipos/${row.id}`)} />
           <ActionButton icon={<Pencil size={16} />} label="Editar" onClick={() => console.log('Editar', row.id)} />
           <ActionButton
             icon={<RotateCcw size={16} />}
