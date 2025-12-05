@@ -5,6 +5,8 @@ import InstitucionesList from './pages/InstitucionesList'
 import InstitucionesServicios from './pages/InstitucionesServicios'
 import InstitucionesOficinas from './pages/InstitucionesOficinas'
 import PageTemplate from './pages/PageTemplate'
+import EquiposTipos from './pages/EquiposTipos'
+import EquiposTiposForm from './pages/EquiposTiposForm'
 
 function App() {
   return (
@@ -31,7 +33,12 @@ function App() {
           />
           <Route
             path="equipos/tipos"
-            element={<PageTemplate title="Tipos de equipos" description="Clasificación y plantillas de equipos." />}
+            element={<EquiposTipos />}
+          />
+          <Route path="equipos/tipos/nuevo" element={<EquiposTiposForm />} />
+          <Route
+            path="equipos/tipos/editar/:id"
+            element={<EquiposTiposForm />}
           />
           <Route
             path="asignaciones"
