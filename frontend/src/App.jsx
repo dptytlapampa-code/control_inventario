@@ -8,6 +8,7 @@ import PageTemplate from './pages/PageTemplate'
 import EquiposTipos from './pages/EquiposTipos'
 import EquiposTiposForm from './pages/EquiposTiposForm'
 import Asignaciones from './pages/Asignaciones'
+import EquiposList from './pages/EquiposList'
 
 function App() {
   return (
@@ -30,7 +31,7 @@ function App() {
           <Route path="oficinas" element={<Navigate to="/instituciones/oficinas" replace />} />
           <Route
             path="equipos/listado"
-            element={<PageTemplate title="Equipos" description="Inventario y estado de equipos." />}
+            element={<EquiposList />}
           />
           <Route
             path="equipos/tipos"
