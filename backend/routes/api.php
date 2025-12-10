@@ -25,3 +25,10 @@ Route::middleware(['auth:keycloak', 'role:superadmin'])->group(function () {
     Route::put('/historial/{id}', [\App\Http\Controllers\EquipoHistorialController::class, 'update']);
     Route::delete('/historial/{id}', [\App\Http\Controllers\EquipoHistorialController::class, 'destroy']);
 });
+
+Route::prefix('superadmin')->middleware(['auth:api', 'role:superadmin'])->group(function () {
+    Route::get('/usuarios', [\App\Http\Controllers\SuperAdmin\UsuarioPermisoController::class, 'index']);
+    Route::get('/usuarios/{id}/permisos', [\App\Http\Controllers\SuperAdmin\UsuarioPermisoController::class, 'show']);
+    Route::post('/usuarios/{id}/permisos', [\App\Http\Controllers\SuperAdmin\UsuarioPermisoController::class, 'store']);
+    Route::delete('/permisos/{id}', [\App\Http\Controllers\SuperAdmin\UsuarioPermisoController::class, 'destroy']);
+});
