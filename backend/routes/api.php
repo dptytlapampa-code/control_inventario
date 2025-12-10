@@ -19,4 +19,9 @@ Route::middleware(['auth:keycloak', 'role:superadmin'])->group(function () {
     Route::post('/equipos/{equipoId}/adjuntos', [\App\Http\Controllers\EquipoAdjuntoController::class, 'store']);
     Route::get('/adjuntos/{id}/download', [\App\Http\Controllers\EquipoAdjuntoController::class, 'download']);
     Route::delete('/adjuntos/{id}', [\App\Http\Controllers\EquipoAdjuntoController::class, 'destroy']);
+
+    Route::get('/equipos/{id}/historial', [\App\Http\Controllers\EquipoHistorialController::class, 'index']);
+    Route::post('/equipos/{id}/historial', [\App\Http\Controllers\EquipoHistorialController::class, 'store']);
+    Route::put('/historial/{id}', [\App\Http\Controllers\EquipoHistorialController::class, 'update']);
+    Route::delete('/historial/{id}', [\App\Http\Controllers\EquipoHistorialController::class, 'destroy']);
 });
