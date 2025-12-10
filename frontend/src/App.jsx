@@ -14,6 +14,7 @@ import EquiposAdjuntos from './pages/EquiposAdjuntos'
 import EquiposHistorial from './pages/EquiposHistorial'
 import SuperAdminUsuarios from './pages/SuperAdminUsuarios'
 import SuperAdminPermisos from './pages/SuperAdminPermisos'
+import ConfigEncabezadoActas from './pages/ConfigEncabezadoActas'
 
 function App() {
   return (
@@ -89,6 +90,7 @@ function App() {
           />
           <Route path="superadmin/usuarios" element={<SuperAdminUsuarios />} />
           <Route path="superadmin/usuarios/:userId/permisos" element={<SuperAdminPermisos />} />
+          <Route path="superadmin/actas/encabezado" element={<ConfigEncabezadoActas />} />
           <Route
             path="configuracion/modulos"
             element={<PageTemplate title="Módulos por institución" description="Activación y configuración modular." />}

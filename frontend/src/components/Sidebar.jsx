@@ -77,6 +77,7 @@ const MENU_STRUCTURE = [
     children: [
       { label: 'Listado', path: '/actas/listado', icon: Files },
       { label: 'Nueva acta', path: '/actas/nueva', icon: FilePlus },
+      { label: 'Configurar encabezado', path: '/superadmin/actas/encabezado', icon: Settings },
     ],
   },
   {
