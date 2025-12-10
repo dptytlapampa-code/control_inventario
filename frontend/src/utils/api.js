@@ -88,6 +88,9 @@ let historiales = [
   },
 ]
 
+let actas = []
+let encabezadoActa = null
+
 let usuarios = [
   {
     id: 'user-001',
@@ -541,6 +544,129 @@ export async function getEquiposPorHospital() {
   })
 
   return Object.entries(resumen).map(([hospital, total]) => ({ hospital, total }))
+}
+
+export async function getEncabezadoActa() {
+  if (API_BASE_URL) {
+    const response = await axios.get(`${API_BASE_URL}/superadmin/encabezado-actas`, {
+      headers: buildAuthHeaders(),
+    })
+    return response.data
+  }
+
+  await delay()
+  return encabezadoActa
+}
+
+export async function uploadEncabezadoActa(file) {
+  if (!file) {
+    throw new Error('Selecciona un archivo válido para el encabezado')
+  }
+
+  if (API_BASE_URL) {
+    const formData = new FormData()
+    formData.append('encabezado', file)
+
+    const response = await axios.post(`${API_BASE_URL}/superadmin/encabezado-actas`, formData, {
+      headers: {
+        ...buildAuthHeaders(),
+        'Content-Type': 'multipart/form-data',
+      },
+    })
+
+    return response.data?.data
+  }
+
+  await delay()
+  const url = URL.createObjectURL(file)
+  encabezadoActa = {
+    filename: file.name,
+    mime: file.type,
+    size: file.size,
+    url,
+  }
+
+  return encabezadoActa
+}
+
+export async function deleteEncabezadoActa() {
+  if (API_BASE_URL) {
+    await axios.delete(`${API_BASE_URL}/superadmin/encabezado-actas`, { headers: buildAuthHeaders() })
+    return true
+  }
+
+  await delay()
+  encabezadoActa = null
+  return true
+}
+
+const actaEndpointMap = {
+  entrega: '/actas/entrega',
+  traslado: '/actas/traslado',
+  baja: '/actas/baja',
+  prestamo: '/actas/prestamo',
+}
+
+const buildActaHeaders = () => ({
+  'Content-Type': 'application/json',
+  ...buildAuthHeaders(),
+})
+
+const generateActa = async (tipo, equipoId, data) => {
+  if (API_BASE_URL) {
+    const response = await axios.post(`${API_BASE_URL}${actaEndpointMap[tipo]}/${equipoId}`, data, {
+      headers: buildActaHeaders(),
+    })
+
+    return response.data
+  }
+
+  await delay()
+  const id = generateId('acta')
+  const mockUrl = URL.createObjectURL(new Blob([`Acta ${tipo} generada`], { type: 'application/pdf' }))
+  const record = {
+    id,
+    tipo,
+    equipoId,
+    motivo: data?.motivo,
+    receptor: data?.receptor_nombre,
+    url: mockUrl,
+  }
+  actas = [record, ...actas]
+  return { id, url: mockUrl, tipo }
+}
+
+export async function generateActaEntrega(equipoId, data) {
+  return generateActa('entrega', equipoId, data)
+}
+
+export async function generateActaTraslado(equipoId, data) {
+  return generateActa('traslado', equipoId, data)
+}
+
+export async function generateActaBaja(equipoId, data) {
+  return generateActa('baja', equipoId, data)
+}
+
+export async function generateActaPrestamo(equipoId, data) {
+  return generateActa('prestamo', equipoId, data)
+}
+
+export async function downloadActa(id) {
+  if (API_BASE_URL) {
+    const response = await axios.get(`${API_BASE_URL}/actas/${id}/download`, {
+      responseType: 'blob',
+      headers: buildAuthHeaders(),
+    })
+    return response.data
+  }
+
+  await delay()
+  const acta = actas.find((item) => item.id === id)
+  if (!acta) {
+    throw new Error('Acta no encontrada')
+  }
+  return new Blob([`Acta ${acta.tipo} mock`], { type: 'application/pdf' })
 }
 
 function obtenerTipo(nombre) {

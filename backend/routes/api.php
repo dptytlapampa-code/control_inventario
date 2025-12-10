@@ -39,4 +39,16 @@ Route::prefix('superadmin')->middleware(['auth:api', 'role:superadmin'])->group(
     Route::get('/usuarios/{id}/permisos', [\App\Http\Controllers\SuperAdmin\UsuarioPermisoController::class, 'show']);
     Route::post('/usuarios/{id}/permisos', [\App\Http\Controllers\SuperAdmin\UsuarioPermisoController::class, 'store']);
     Route::delete('/permisos/{id}', [\App\Http\Controllers\SuperAdmin\UsuarioPermisoController::class, 'destroy']);
+
+    Route::get('/encabezado-actas', [\App\Http\Controllers\SuperAdmin\EncabezadoActaController::class, 'index']);
+    Route::post('/encabezado-actas', [\App\Http\Controllers\SuperAdmin\EncabezadoActaController::class, 'store']);
+    Route::delete('/encabezado-actas', [\App\Http\Controllers\SuperAdmin\EncabezadoActaController::class, 'destroy']);
+});
+
+Route::prefix('actas')->middleware(['auth:api'])->group(function () {
+    Route::post('/entrega/{equipoId}', [\App\Http\Controllers\ActasController::class, 'generarEntrega']);
+    Route::post('/traslado/{equipoId}', [\App\Http\Controllers\ActasController::class, 'generarTraslado']);
+    Route::post('/baja/{equipoId}', [\App\Http\Controllers\ActasController::class, 'generarBaja']);
+    Route::post('/prestamo/{equipoId}', [\App\Http\Controllers\ActasController::class, 'generarPrestamo']);
+    Route::get('/{id}/download', [\App\Http\Controllers\ActasController::class, 'download']);
 });
