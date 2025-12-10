@@ -17,6 +17,7 @@ import SuperAdminPermisos from './pages/SuperAdminPermisos'
 import ConfigEncabezadoActas from './pages/ConfigEncabezadoActas'
 import Auditoria from './pages/Auditoria'
 import BuscadorGlobal from './pages/BuscadorGlobal'
+import Exportaciones from './pages/Exportaciones'
 
 function App() {
   return (
@@ -99,6 +100,7 @@ function App() {
             path="configuracion/modulos"
             element={<PageTemplate title="Módulos por institución" description="Activación y configuración modular." />}
           />
+          <Route path="sistema/exportaciones" element={<Exportaciones />} />
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Route>
       </Routes>
