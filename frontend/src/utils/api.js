@@ -1074,6 +1074,72 @@ export async function exportAuditoriaExcel(params = {}) {
   return new Blob([encabezados + cuerpo], { type: 'text/csv' })
 }
 
+const downloadExport = async (endpoint, params = {}, fallbackBuilder) => {
+  if (API_BASE_URL) {
+    const response = await axios.get(`${API_BASE_URL}${endpoint}`, {
+      params,
+      responseType: 'blob',
+      headers: buildAuthHeaders(),
+    })
+
+    return response.data
+  }
+
+  await delay()
+  return fallbackBuilder ? fallbackBuilder(params || {}) : new Blob(['export mock'], { type: 'text/plain' })
+}
+
+const buildMockFile = (label, format = 'excel') => {
+  const mime =
+    format === 'pdf'
+      ? 'application/pdf'
+      : format === 'csv'
+        ? 'text/csv'
+        : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+
+  return new Blob([`${label} export`], { type: mime })
+}
+
+export async function exportEquipos(params = {}) {
+  return downloadExport('/export/equipos', params, (settings) => buildMockFile('equipos', settings?.format))
+}
+
+export async function exportMantenimientos(params = {}) {
+  return downloadExport('/export/mantenimientos', params, (settings) => buildMockFile('mantenimientos', settings?.format))
+}
+
+export async function exportHistorial(params = {}) {
+  return downloadExport('/export/historial', params, (settings) => buildMockFile('historial', settings?.format))
+}
+
+export async function exportActas(params = {}) {
+  return downloadExport('/export/actas', params, (settings) => buildMockFile('actas', settings?.format))
+}
+
+export async function exportUsuarios(params = {}) {
+  return downloadExport('/export/usuarios', params, (settings) => buildMockFile('usuarios', settings?.format))
+}
+
+export async function exportAuditoria(params = {}) {
+  return downloadExport('/export/auditoria', params, (settings) => buildMockFile('auditoria', settings?.format))
+}
+
+export async function exportHospitales(params = {}) {
+  return downloadExport('/export/hospitales', params, (settings) => buildMockFile('hospitales', settings?.format))
+}
+
+export async function exportServicios(params = {}) {
+  return downloadExport('/export/servicios', params, (settings) => buildMockFile('servicios', settings?.format))
+}
+
+export async function exportOficinas(params = {}) {
+  return downloadExport('/export/oficinas', params, (settings) => buildMockFile('oficinas', settings?.format))
+}
+
+export async function exportTiposEquipos(params = {}) {
+  return downloadExport('/export/tipos-equipos', params, (settings) => buildMockFile('tipos-equipos', settings?.format))
+}
+
 function obtenerTipo(nombre) {
   const extension = nombre.split('.').pop()?.toLowerCase()
 

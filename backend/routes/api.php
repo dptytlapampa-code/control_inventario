@@ -40,6 +40,19 @@ Route::middleware(['auth:api', 'capture.ip'])->group(function () {
     Route::get('/mantenimientos', [\App\Http\Controllers\MantenimientosController::class, 'index']);
 });
 
+Route::prefix('export')->middleware(['auth:api', 'role:admin|superadmin', 'capture.ip'])->group(function () {
+    Route::get('/equipos', [\App\Http\Controllers\ExportacionesController::class, 'exportEquipos']);
+    Route::get('/mantenimientos', [\App\Http\Controllers\ExportacionesController::class, 'exportMantenimientos']);
+    Route::get('/historial', [\App\Http\Controllers\ExportacionesController::class, 'exportHistorial']);
+    Route::get('/actas', [\App\Http\Controllers\ExportacionesController::class, 'exportActas']);
+    Route::get('/usuarios', [\App\Http\Controllers\ExportacionesController::class, 'exportUsuarios']);
+    Route::get('/auditoria', [\App\Http\Controllers\ExportacionesController::class, 'exportAuditoria']);
+    Route::get('/oficinas', [\App\Http\Controllers\ExportacionesController::class, 'exportOficinas']);
+    Route::get('/servicios', [\App\Http\Controllers\ExportacionesController::class, 'exportServicios']);
+    Route::get('/hospitales', [\App\Http\Controllers\ExportacionesController::class, 'exportHospitales']);
+    Route::get('/tipos-equipos', [\App\Http\Controllers\ExportacionesController::class, 'exportTiposEquipos']);
+});
+
 Route::prefix('superadmin')->middleware(['auth:api', 'role:superadmin', 'capture.ip'])->group(function () {
     Route::get('/usuarios', [\App\Http\Controllers\SuperAdmin\UsuarioPermisoController::class, 'index']);
     Route::get('/usuarios/{id}/permisos', [\App\Http\Controllers\SuperAdmin\UsuarioPermisoController::class, 'show']);

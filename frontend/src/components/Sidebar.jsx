@@ -92,6 +92,7 @@ const MENU_STRUCTURE = [
     label: 'Sistema',
     icon: Shield,
     children: [
+      { label: 'Exportaciones', path: '/sistema/exportaciones', icon: Files, roles: ['admin', 'superadmin'] },
       { label: 'Auditoría', path: '/sistema/auditoria', icon: History, roles: ['admin', 'superadmin'] },
     ],
   },
