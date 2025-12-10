@@ -92,6 +92,7 @@ const MENU_STRUCTURE = [
     children: [
       { label: 'Usuarios', path: '/administracion/usuarios', icon: Users },
       { label: 'Roles y permisos', path: '/administracion/roles-permisos', icon: BadgeCheck },
+      { label: 'Panel SuperAdmin', path: '/superadmin/usuarios', icon: ShieldCheck },
     ],
   },
   {

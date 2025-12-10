@@ -85,6 +85,50 @@ let historiales = [
   },
 ]
 
+let usuarios = [
+  {
+    id: 'user-001',
+    nombre: 'Ana SuperAdmin',
+    email: 'ana.superadmin@example.com',
+    roles: ['superadmin', 'gestor'],
+  },
+  {
+    id: 'user-002',
+    nombre: 'Bruno Operaciones',
+    email: 'bruno.ops@example.com',
+    roles: ['operador'],
+  },
+  {
+    id: 'user-003',
+    nombre: 'Carla Auditoría',
+    email: 'carla.audit@example.com',
+    roles: ['auditor'],
+  },
+]
+
+let usuarioPermisos = [
+  {
+    id: 'perm-001',
+    user_id: 'user-001',
+    hospital_id: null,
+    modulo: 'Hospitales',
+    puede_ver: true,
+    puede_crear: true,
+    puede_editar: true,
+    puede_eliminar: true,
+  },
+  {
+    id: 'perm-002',
+    user_id: 'user-001',
+    hospital_id: 'h1',
+    modulo: 'Equipos',
+    puede_ver: true,
+    puede_crear: true,
+    puede_editar: true,
+    puede_eliminar: false,
+  },
+]
+
 const clone = (data) => JSON.parse(JSON.stringify(data))
 
 const generateId = (prefix) => `${prefix}-${Math.random().toString(36).slice(2, 8)}`
@@ -282,6 +326,56 @@ export async function updateHistorial(id, data) {
 export async function deleteHistorial(id) {
   await delay()
   historiales = historiales.filter((item) => item.id !== id)
+  return true
+}
+
+export async function getUsuarios() {
+  await delay()
+  return clone(usuarios)
+}
+
+export async function getPermisosUsuario(userId) {
+  await delay()
+  return clone(usuarioPermisos.filter((permiso) => permiso.user_id === userId))
+}
+
+export async function savePermisosUsuario(userId, data) {
+  await delay()
+  const payload = Array.isArray(data?.permisos) ? data.permisos : data ? [data] : []
+
+  payload.forEach((permiso) => {
+    const targetHospital = permiso.hospital_id ?? null
+    const existingIndex = usuarioPermisos.findIndex(
+      (item) => item.user_id === userId && item.modulo === permiso.modulo && (item.hospital_id ?? null) === targetHospital,
+    )
+
+    const record = {
+      id: existingIndex >= 0 ? usuarioPermisos[existingIndex].id : generateId('perm'),
+      user_id: userId,
+      hospital_id: targetHospital,
+      modulo: permiso.modulo,
+      puede_ver: Boolean(permiso.puede_ver),
+      puede_crear: Boolean(permiso.puede_crear),
+      puede_editar: Boolean(permiso.puede_editar),
+      puede_eliminar: Boolean(permiso.puede_eliminar),
+    }
+
+    if (existingIndex >= 0) {
+      usuarioPermisos[existingIndex] = record
+    } else {
+      usuarioPermisos = [...usuarioPermisos, record]
+    }
+  })
+
+  return {
+    user_id: userId,
+    permisos: clone(usuarioPermisos.filter((permiso) => permiso.user_id === userId)),
+  }
+}
+
+export async function deletePermiso(id) {
+  await delay()
+  usuarioPermisos = usuarioPermisos.filter((permiso) => permiso.id !== id)
   return true
 }
 

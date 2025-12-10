@@ -12,6 +12,8 @@ import EquiposList from './pages/EquiposList'
 import EquipoDetalle from './pages/EquipoDetalle'
 import EquiposAdjuntos from './pages/EquiposAdjuntos'
 import EquiposHistorial from './pages/EquiposHistorial'
+import SuperAdminUsuarios from './pages/SuperAdminUsuarios'
+import SuperAdminPermisos from './pages/SuperAdminPermisos'
 
 function App() {
   return (
@@ -84,6 +86,8 @@ function App() {
             path="administracion/roles-permisos"
             element={<PageTemplate title="Roles y permisos" description="Definición de permisos y perfiles." />}
           />
+          <Route path="superadmin/usuarios" element={<SuperAdminUsuarios />} />
+          <Route path="superadmin/usuarios/:userId/permisos" element={<SuperAdminPermisos />} />
           <Route
             path="configuracion/modulos"
             element={<PageTemplate title="Módulos por institución" description="Activación y configuración modular." />}
