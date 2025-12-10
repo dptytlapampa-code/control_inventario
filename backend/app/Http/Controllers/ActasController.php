@@ -13,6 +13,45 @@ use SimpleSoftwareIO\QrCode\Facade\QrCode;
 
 class ActasController extends Controller
 {
+    public function index(Request $request)
+    {
+        $validated = $request->validate([
+            'q' => 'nullable|string|max:255',
+            'hospital_id' => 'nullable|string',
+            'tipo' => 'nullable|string',
+            'fecha_desde' => 'nullable|date',
+            'fecha_hasta' => 'nullable|date',
+            'page' => 'nullable|integer|min:1',
+            'per_page' => 'nullable|integer|min:1|max:100',
+        ]);
+
+        $query = Acta::query()
+            ->when($validated['q'] ?? null, function ($builder, string $texto) {
+                $builder->where(function ($query) use ($texto) {
+                    $query->where('motivo', 'like', "%{$texto}%")
+                        ->orWhere('tipo', 'like', "%{$texto}%")
+                        ->orWhere('receptor_nombre', 'like', "%{$texto}%");
+                });
+            })
+            ->when($validated['hospital_id'] ?? null, fn ($builder, string $hospitalId) => $builder->where('hospital_id', $hospitalId))
+            ->when($validated['tipo'] ?? null, fn ($builder, string $tipo) => $builder->where('tipo', $tipo))
+            ->when($validated['fecha_desde'] ?? null, fn ($builder, string $desde) => $builder->whereDate('created_at', '>=', $desde))
+            ->when($validated['fecha_hasta'] ?? null, fn ($builder, string $hasta) => $builder->whereDate('created_at', '<=', $hasta))
+            ->orderByDesc('created_at');
+
+        $paginator = $query->paginate((int) ($validated['per_page'] ?? 15), ['*'], 'page', (int) ($validated['page'] ?? 1));
+
+        return response()->json([
+            'data' => $paginator->items(),
+            'meta' => [
+                'current_page' => $paginator->currentPage(),
+                'per_page' => $paginator->perPage(),
+                'total' => $paginator->total(),
+                'last_page' => $paginator->lastPage(),
+            ],
+        ]);
+    }
+
     public function generarEntrega(Request $request, string $equipoId)
     {
         return $this->generarActa($request, 'entrega', $equipoId);

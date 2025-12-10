@@ -62,7 +62,7 @@ function EquiposList() {
         setServices(serviceResponse)
         setOffices(officeResponse)
         setTypes(typeResponse)
-        setEquipments(equipmentResponse)
+        setEquipments(equipmentResponse.data || equipmentResponse)
       } catch (error) {
         setErrorMessage('No pudimos cargar los equipos.')
       } finally {
