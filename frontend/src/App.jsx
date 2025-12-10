@@ -10,7 +10,6 @@ import EquiposTiposForm from './pages/EquiposTiposForm'
 import Asignaciones from './pages/Asignaciones'
 import EquiposList from './pages/EquiposList'
 import EquipoDetalle from './pages/EquipoDetalle'
-import PosPage from './modules/pos/pages/PosPage'
 
 function App() {
   return (
@@ -85,7 +84,6 @@ function App() {
             path="configuracion/modulos"
             element={<PageTemplate title="Módulos por institución" description="Activación y configuración modular." />}
           />
-          <Route path="pos" element={<PosPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
       </Routes>

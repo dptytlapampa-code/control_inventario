@@ -14,6 +14,6 @@ class Kernel extends HttpKernel
      * @var array<string, class-string|string>
      */
     protected $routeMiddleware = [
-        'role' => \App\Http\Middleware\CheckRole::class,
+        'role' => \App\Http\Middleware\KeycloakRoleMiddleware::class,
     ];
 }
