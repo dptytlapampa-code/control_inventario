@@ -61,6 +61,8 @@ let mantenimientos = [
   },
 ]
 
+let adjuntos = []
+
 const clone = (data) => JSON.parse(JSON.stringify(data))
 
 const generateId = (prefix) => `${prefix}-${Math.random().toString(36).slice(2, 8)}`
@@ -210,4 +212,69 @@ export async function deleteMantenimiento(id) {
   await delay()
   mantenimientos = mantenimientos.filter((item) => item.id !== id)
   return true
+}
+
+export async function uploadAdjunto(equipoId, file) {
+  await delay()
+
+  if (!file) {
+    throw new Error('No se ha seleccionado un archivo válido')
+  }
+
+  const nuevo = {
+    id: generateId('adj'),
+    equipoId,
+    nombre: file.name,
+    tipo: obtenerTipo(file.name),
+    fecha: new Date().toLocaleDateString('es-ES'),
+    size: file.size || 0,
+    file,
+    mime: file.type || 'application/octet-stream',
+  }
+
+  adjuntos = [nuevo, ...adjuntos]
+  return { ...nuevo }
+}
+
+export async function getAdjuntos(equipoId) {
+  await delay()
+  return adjuntos.filter((item) => item.equipoId === equipoId).map((item) => ({ ...item }))
+}
+
+export async function deleteAdjunto(id) {
+  await delay()
+  adjuntos = adjuntos.filter((item) => item.id !== id)
+  return true
+}
+
+export async function downloadAdjunto(id) {
+  await delay()
+  const adjunto = adjuntos.find((item) => item.id === id)
+
+  if (!adjunto) {
+    throw new Error('Adjunto no encontrado')
+  }
+
+  return {
+    id: adjunto.id,
+    nombre: adjunto.nombre,
+    mime: adjunto.mime,
+    file: adjunto.file,
+  }
+}
+
+function obtenerTipo(nombre) {
+  const extension = nombre.split('.').pop()?.toLowerCase()
+
+  switch (extension) {
+    case 'pdf':
+      return 'PDF'
+    case 'jpg':
+    case 'jpeg':
+      return 'JPG'
+    case 'png':
+      return 'PNG'
+    default:
+      return 'Archivo'
+  }
 }
