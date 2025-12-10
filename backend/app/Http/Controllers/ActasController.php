@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Acta;
 use App\Models\EncabezadoActa;
+use App\Services\AuditoriaService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -105,6 +106,24 @@ class ActasController extends Controller
         $pdf = Pdf::loadView('actas.' . $tipo, $viewData)->setPaper('a4');
         Storage::disk('public')->makeDirectory('actas/' . $tipo);
         Storage::disk('public')->put($acta->path, $pdf->output());
+
+        AuditoriaService::registrar(
+            'Generar acta en PDF',
+            'Actas',
+            $acta->id,
+            null,
+            [
+                'tipo' => $tipo,
+                'equipo_id' => $equipoId,
+                'motivo' => $validated['motivo'],
+                'receptor' => [
+                    'nombre' => $validated['receptor_nombre'],
+                    'identificacion' => $validated['receptor_identificacion'] ?? null,
+                    'cargo' => $validated['receptor_cargo'] ?? null,
+                ],
+                'usuario' => $user?->email,
+            ]
+        );
 
         return response()->json([
             'id' => $acta->id,

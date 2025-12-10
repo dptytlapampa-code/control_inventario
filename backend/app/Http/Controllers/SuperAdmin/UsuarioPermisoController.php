@@ -5,6 +5,7 @@ namespace App\Http\Controllers\SuperAdmin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreUsuarioPermisoRequest;
 use App\Models\UsuarioPermiso;
+use App\Services\AuditoriaService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -30,6 +31,17 @@ class UsuarioPermisoController extends Controller
             ->orderBy('modulo')
             ->orderBy('hospital_id')
             ->get();
+
+        AuditoriaService::registrar(
+            'Actualizar permisos',
+            'Permisos',
+            $id,
+            null,
+            [
+                'total_permisos' => $permisos->count(),
+                'modulos' => $permisos->pluck('modulo'),
+            ]
+        );
 
         return response()->json([
             'data' => [
@@ -78,7 +90,16 @@ class UsuarioPermisoController extends Controller
         $this->ensureSuperAdmin($request);
 
         $permiso = UsuarioPermiso::findOrFail($id);
+        $antes = $permiso->toArray();
         $permiso->delete();
+
+        AuditoriaService::registrar(
+            'Eliminar permiso',
+            'Permisos',
+            $id,
+            $antes,
+            null
+        );
 
         return response()->json(null, 204);
     }

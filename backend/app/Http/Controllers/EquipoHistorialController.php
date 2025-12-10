@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreEquipoHistorialRequest;
 use App\Models\EquipoHistorial;
+use App\Services\AuditoriaService;
 use Illuminate\Support\Str;
 
 class EquipoHistorialController extends Controller
@@ -32,6 +33,18 @@ class EquipoHistorialController extends Controller
 
         $historial = EquipoHistorial::create($data);
 
+        AuditoriaService::registrar(
+            'Crear historial',
+            'Historial',
+            $historial->id,
+            null,
+            [
+                'equipo_id' => $equipoId,
+                'tipo_evento' => $historial->tipo_evento,
+                'fecha_evento' => $historial->fecha_evento,
+            ]
+        );
+
         return response()->json($historial, 201);
     }
 
@@ -43,7 +56,23 @@ class EquipoHistorialController extends Controller
         $data = $request->validated();
         unset($data['equipo_id'], $data['usuario_registra']);
 
+        $antes = [
+            'tipo_evento' => $historial->tipo_evento,
+            'fecha_evento' => $historial->fecha_evento,
+        ];
+
         $historial->update($data);
+
+        AuditoriaService::registrar(
+            'Editar historial',
+            'Historial',
+            $historial->id,
+            $antes,
+            [
+                'tipo_evento' => $historial->tipo_evento,
+                'fecha_evento' => $historial->fecha_evento,
+            ]
+        );
 
         return response()->json($historial);
     }
@@ -52,6 +81,17 @@ class EquipoHistorialController extends Controller
     {
         $historial = EquipoHistorial::findOrFail($id);
         $this->authorize('delete', $historial);
+
+        AuditoriaService::registrar(
+            'Eliminar historial',
+            'Historial',
+            $historial->id,
+            [
+                'equipo_id' => $historial->equipo_id,
+                'tipo_evento' => $historial->tipo_evento,
+            ],
+            null
+        );
 
         $historial->delete();
 

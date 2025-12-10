@@ -4,6 +4,7 @@ namespace App\Http\Controllers\SuperAdmin;
 
 use App\Http\Controllers\Controller;
 use App\Models\EncabezadoActa;
+use App\Services\AuditoriaService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -80,6 +81,17 @@ class EncabezadoActaController extends Controller
             'size' => $storedSize,
         ]);
 
+        AuditoriaService::registrar(
+            'Configuración de encabezado',
+            'Actas',
+            $encabezado->id,
+            null,
+            [
+                'mime' => $encabezado->mime,
+                'size' => $encabezado->size,
+            ]
+        );
+
         return response()->json([
             'message' => 'Encabezado actualizado correctamente.',
             'data' => [
@@ -106,6 +118,17 @@ class EncabezadoActaController extends Controller
         }
 
         EncabezadoActa::truncate();
+
+        AuditoriaService::registrar(
+            'Eliminar encabezado',
+            'Actas',
+            $encabezado->id,
+            [
+                'mime' => $encabezado->mime,
+                'size' => $encabezado->size,
+            ],
+            null
+        );
 
         return response()->json(null, 204);
     }

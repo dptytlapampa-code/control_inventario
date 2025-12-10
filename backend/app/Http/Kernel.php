@@ -15,5 +15,6 @@ class Kernel extends HttpKernel
      */
     protected $routeMiddleware = [
         'role' => \App\Http\Middleware\KeycloakRoleMiddleware::class,
+        'capture.ip' => \App\Http\Middleware\CapturaIP::class,
     ];
 }
