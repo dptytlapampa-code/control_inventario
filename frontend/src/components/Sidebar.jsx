@@ -33,7 +33,7 @@ const MENU_STRUCTURE = [
     id: 'dashboard',
     label: 'Dashboard',
     icon: LayoutDashboard,
-    path: '/',
+    path: '/dashboard',
   },
   {
     id: 'instituciones',

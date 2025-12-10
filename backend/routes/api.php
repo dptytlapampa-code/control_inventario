@@ -26,6 +26,14 @@ Route::middleware(['auth:keycloak', 'role:superadmin'])->group(function () {
     Route::delete('/historial/{id}', [\App\Http\Controllers\EquipoHistorialController::class, 'destroy']);
 });
 
+Route::middleware(['auth:keycloak'])->group(function () {
+    Route::get('/dashboard/kpis', [\App\Http\Controllers\DashboardController::class, 'kpis']);
+    Route::get('/dashboard/equipos-por-tipo', [\App\Http\Controllers\DashboardController::class, 'equiposPorTipo']);
+    Route::get('/dashboard/equipos-por-estado', [\App\Http\Controllers\DashboardController::class, 'equiposPorEstado']);
+    Route::get('/dashboard/mantenimientos-por-mes', [\App\Http\Controllers\DashboardController::class, 'mantenimientosPorMes']);
+    Route::get('/dashboard/equipos-por-hospital', [\App\Http\Controllers\DashboardController::class, 'equiposPorHospital']);
+});
+
 Route::prefix('superadmin')->middleware(['auth:api', 'role:superadmin'])->group(function () {
     Route::get('/usuarios', [\App\Http\Controllers\SuperAdmin\UsuarioPermisoController::class, 'index']);
     Route::get('/usuarios/{id}/permisos', [\App\Http\Controllers\SuperAdmin\UsuarioPermisoController::class, 'show']);

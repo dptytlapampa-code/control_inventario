@@ -20,7 +20,8 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route element={<MainLayout />}>
-          <Route index element={<Dashboard />} />
+          <Route index element={<Navigate to="/dashboard" replace />} />
+          <Route path="dashboard" element={<Dashboard />} />
           <Route
             path="instituciones/listado"
             element={<InstitucionesList />}
@@ -92,7 +93,7 @@ function App() {
             path="configuracion/modulos"
             element={<PageTemplate title="Módulos por institución" description="Activación y configuración modular." />}
           />
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Route>
       </Routes>
     </BrowserRouter>

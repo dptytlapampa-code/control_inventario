@@ -1,4 +1,7 @@
+import axios from 'axios'
+
 const delay = (ms = 350) => new Promise((resolve) => setTimeout(resolve, ms))
+const API_BASE_URL = import.meta.env.VITE_API_URL
 
 let hospitales = [
   { id: 'h1', nombre: 'Hospital Central', direccion: 'Av. Principal 123', telefono: '555-1234', email: 'contacto@hospitalcentral.com' },
@@ -132,6 +135,17 @@ let usuarioPermisos = [
 const clone = (data) => JSON.parse(JSON.stringify(data))
 
 const generateId = (prefix) => `${prefix}-${Math.random().toString(36).slice(2, 8)}`
+
+const buildAuthHeaders = () => {
+  const token = localStorage.getItem('token') || localStorage.getItem('authToken')
+  return token ? { Authorization: `Bearer ${token}` } : {}
+}
+
+const fetchDashboardResource = async (path) => {
+  if (!API_BASE_URL) return null
+  const response = await axios.get(`${API_BASE_URL}${path}`, { headers: buildAuthHeaders() })
+  return response.data
+}
 
 export async function getHospitales() {
   await delay()
@@ -426,6 +440,107 @@ export async function downloadAdjunto(id) {
     mime: adjunto.mime,
     file: adjunto.file,
   }
+}
+
+const normalizeEstados = (items) => {
+  const estadoMap = {}
+  items.forEach((item) => {
+    estadoMap[item.estado?.toLowerCase() || 'desconocido'] = (estadoMap[item.estado?.toLowerCase() || 'desconocido'] || 0) + 1
+  })
+  return estadoMap
+}
+
+const mantenimientosPorMesMock = () => {
+  const resumen = {}
+  mantenimientos.forEach((item) => {
+    if (!item.fecha) return
+    const fecha = new Date(item.fecha)
+    if (Number.isNaN(fecha.getTime())) return
+    const label = `${fecha.getFullYear()}-${String(fecha.getMonth() + 1).padStart(2, '0')}`
+    resumen[label] = (resumen[label] || 0) + 1
+  })
+  return Object.entries(resumen)
+    .sort(([a], [b]) => (a > b ? 1 : -1))
+    .map(([mes, total]) => ({ mes, total }))
+}
+
+export async function getDashboardKpis() {
+  if (API_BASE_URL) {
+    const data = await fetchDashboardResource('/dashboard/kpis')
+    if (data) return data
+  }
+
+  await delay()
+  const estadoMap = normalizeEstados(equipos)
+  const hoy = new Date()
+  const mantenimientosMes = mantenimientos.filter((item) => {
+    const fecha = new Date(item.fecha)
+    return !Number.isNaN(fecha.getTime()) &&
+      fecha.getFullYear() === hoy.getFullYear() &&
+      fecha.getMonth() === hoy.getMonth()
+  }).length
+
+  return {
+    total_equipos: equipos.length,
+    equipos_por_estado: estadoMap,
+    mantenimientos_mes: mantenimientosMes,
+    total_hospitales: hospitales.length,
+    total_servicios: servicios.length,
+    total_oficinas: oficinas.length,
+  }
+}
+
+export async function getEquiposPorTipo() {
+  if (API_BASE_URL) {
+    const data = await fetchDashboardResource('/dashboard/equipos-por-tipo')
+    if (data) return data
+  }
+
+  await delay()
+  const resumen = {}
+  equipos.forEach((item) => {
+    const tipo = tiposEquipos.find((tipoEquipo) => tipoEquipo.id === item.tipoId)?.nombre || 'Sin tipo'
+    resumen[tipo] = (resumen[tipo] || 0) + 1
+  })
+
+  return Object.entries(resumen).map(([tipo, total]) => ({ tipo, total }))
+}
+
+export async function getEquiposPorEstado() {
+  if (API_BASE_URL) {
+    const data = await fetchDashboardResource('/dashboard/equipos-por-estado')
+    if (data) return data
+  }
+
+  await delay()
+  const estadoMap = normalizeEstados(equipos)
+  return Object.entries(estadoMap).map(([estado, total]) => ({ estado, total }))
+}
+
+export async function getMantenimientosPorMes() {
+  if (API_BASE_URL) {
+    const data = await fetchDashboardResource('/dashboard/mantenimientos-por-mes')
+    if (data) return data
+  }
+
+  await delay()
+  return mantenimientosPorMesMock()
+}
+
+export async function getEquiposPorHospital() {
+  if (API_BASE_URL) {
+    const data = await fetchDashboardResource('/dashboard/equipos-por-hospital')
+    if (data) return data
+  }
+
+  await delay()
+  const resumen = {}
+  equipos.forEach((item) => {
+    const hospital = hospitales.find((h) => h.id === item.hospitalId)?.nombre || 'Sin hospital'
+    resumen[hospital] = (resumen[hospital] || 0) + 1
+  })
+
+  return Object.entries(resumen).map(([hospital, total]) => ({ hospital, total }))
 }
 
 function obtenerTipo(nombre) {
