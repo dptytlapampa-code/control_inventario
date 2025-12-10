@@ -36,12 +36,6 @@ const MENU_STRUCTURE = [
     path: '/',
   },
   {
-    id: 'pos',
-    label: 'POS / Caja',
-    icon: PanelsTopLeft,
-    path: '/pos',
-  },
-  {
     id: 'instituciones',
     label: 'Instituciones',
     icon: Building2,
