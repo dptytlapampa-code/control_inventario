@@ -14,4 +14,9 @@ Route::middleware(['auth:keycloak', 'role:superadmin'])->group(function () {
     Route::get('/instituciones/{id}', [\App\Http\Controllers\InstitucionController::class, 'show']);
     Route::put('/instituciones/{id}', [\App\Http\Controllers\InstitucionController::class, 'update']);
     Route::delete('/instituciones/{id}', [\App\Http\Controllers\InstitucionController::class, 'destroy']);
+
+    Route::get('/equipos/{equipoId}/adjuntos', [\App\Http\Controllers\EquipoAdjuntoController::class, 'index']);
+    Route::post('/equipos/{equipoId}/adjuntos', [\App\Http\Controllers\EquipoAdjuntoController::class, 'store']);
+    Route::get('/adjuntos/{id}/download', [\App\Http\Controllers\EquipoAdjuntoController::class, 'download']);
+    Route::delete('/adjuntos/{id}', [\App\Http\Controllers\EquipoAdjuntoController::class, 'destroy']);
 });
