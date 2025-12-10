@@ -23,6 +23,7 @@ import {
   ListChecks,
   Shapes,
   Users,
+  Shield,
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import MenuGroup from './MenuGroup'
@@ -87,6 +88,14 @@ const MENU_STRUCTURE = [
     path: '/reportes',
   },
   {
+    id: 'sistema',
+    label: 'Sistema',
+    icon: Shield,
+    children: [
+      { label: 'Auditoría', path: '/sistema/auditoria', icon: History, roles: ['admin', 'superadmin'] },
+    ],
+  },
+  {
     id: 'administracion',
     label: 'Administración',
     icon: ShieldCheck,
@@ -106,12 +115,44 @@ const MENU_STRUCTURE = [
 
 function Sidebar({ active = '', isOpen = false, onClose }) {
   const navigate = useNavigate()
+  const userRoles = useMemo(() => {
+    const stored = localStorage.getItem('userRoles') || localStorage.getItem('roles') || ''
+    try {
+      const parsed = JSON.parse(stored)
+      if (Array.isArray(parsed)) {
+        return parsed.map((role) => String(role).toLowerCase())
+      }
+    } catch (error) {
+      /* noop */
+    }
+    return String(stored)
+      .split(',')
+      .map((role) => role.trim().toLowerCase())
+      .filter(Boolean)
+  }, [])
   const [openGroup, setOpenGroup] = useState(null)
 
+  const hasAccess = (item) => {
+    if (!item.roles || item.roles.length === 0) return true
+    return item.roles.some((role) => userRoles.includes(role.toLowerCase()))
+  }
+
+  const menuItems = useMemo(() => {
+    return MENU_STRUCTURE.map((item) => {
+      if (!item.children) {
+        return hasAccess(item) ? item : null
+      }
+
+      const filteredChildren = item.children.filter((child) => hasAccess(child))
+      if (!filteredChildren.length) return null
+      return { ...item, children: filteredChildren }
+    }).filter(Boolean)
+  }, [userRoles])
+
   const initialGroup = useMemo(() => {
-    const match = MENU_STRUCTURE.find((item) => item.children?.some((child) => active.startsWith(child.path)))
+    const match = menuItems.find((item) => item.children?.some((child) => active.startsWith(child.path)))
     return match?.id || null
-  }, [active])
+  }, [active, menuItems])
 
   useEffect(() => {
     setOpenGroup(initialGroup)
@@ -167,7 +208,7 @@ function Sidebar({ active = '', isOpen = false, onClose }) {
         </div>
 
         <div className="flex-1 overflow-y-auto px-3 py-4 space-y-2">
-          {MENU_STRUCTURE.map((item) => {
+          {menuItems.map((item) => {
             if (item.children) {
               return (
                 <MenuGroup

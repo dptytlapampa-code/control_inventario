@@ -1,6 +1,6 @@
 <?php
 
-Route::middleware(['auth:keycloak', 'role:superadmin'])->group(function () {
+Route::middleware(['auth:keycloak', 'role:superadmin', 'capture.ip'])->group(function () {
     Route::get('/tipos-institucion', [\App\Http\Controllers\TipoInstitucionController::class, 'index']);
     Route::post('/tipos-institucion', [\App\Http\Controllers\TipoInstitucionController::class, 'store']);
     Route::get('/tipos-institucion/{id}', [\App\Http\Controllers\TipoInstitucionController::class, 'show']);
@@ -8,7 +8,7 @@ Route::middleware(['auth:keycloak', 'role:superadmin'])->group(function () {
     Route::delete('/tipos-institucion/{id}', [\App\Http\Controllers\TipoInstitucionController::class, 'destroy']);
 });
 
-Route::middleware(['auth:keycloak', 'role:superadmin'])->group(function () {
+Route::middleware(['auth:keycloak', 'role:superadmin', 'capture.ip'])->group(function () {
     Route::get('/instituciones', [\App\Http\Controllers\InstitucionController::class, 'index']);
     Route::post('/instituciones', [\App\Http\Controllers\InstitucionController::class, 'store']);
     Route::get('/instituciones/{id}', [\App\Http\Controllers\InstitucionController::class, 'show']);
@@ -26,7 +26,7 @@ Route::middleware(['auth:keycloak', 'role:superadmin'])->group(function () {
     Route::delete('/historial/{id}', [\App\Http\Controllers\EquipoHistorialController::class, 'destroy']);
 });
 
-Route::middleware(['auth:keycloak'])->group(function () {
+Route::middleware(['auth:keycloak', 'capture.ip'])->group(function () {
     Route::get('/dashboard/kpis', [\App\Http\Controllers\DashboardController::class, 'kpis']);
     Route::get('/dashboard/equipos-por-tipo', [\App\Http\Controllers\DashboardController::class, 'equiposPorTipo']);
     Route::get('/dashboard/equipos-por-estado', [\App\Http\Controllers\DashboardController::class, 'equiposPorEstado']);
@@ -34,7 +34,7 @@ Route::middleware(['auth:keycloak'])->group(function () {
     Route::get('/dashboard/equipos-por-hospital', [\App\Http\Controllers\DashboardController::class, 'equiposPorHospital']);
 });
 
-Route::prefix('superadmin')->middleware(['auth:api', 'role:superadmin'])->group(function () {
+Route::prefix('superadmin')->middleware(['auth:api', 'role:superadmin', 'capture.ip'])->group(function () {
     Route::get('/usuarios', [\App\Http\Controllers\SuperAdmin\UsuarioPermisoController::class, 'index']);
     Route::get('/usuarios/{id}/permisos', [\App\Http\Controllers\SuperAdmin\UsuarioPermisoController::class, 'show']);
     Route::post('/usuarios/{id}/permisos', [\App\Http\Controllers\SuperAdmin\UsuarioPermisoController::class, 'store']);
@@ -45,10 +45,16 @@ Route::prefix('superadmin')->middleware(['auth:api', 'role:superadmin'])->group(
     Route::delete('/encabezado-actas', [\App\Http\Controllers\SuperAdmin\EncabezadoActaController::class, 'destroy']);
 });
 
-Route::prefix('actas')->middleware(['auth:api'])->group(function () {
+Route::prefix('actas')->middleware(['auth:api', 'capture.ip'])->group(function () {
     Route::post('/entrega/{equipoId}', [\App\Http\Controllers\ActasController::class, 'generarEntrega']);
     Route::post('/traslado/{equipoId}', [\App\Http\Controllers\ActasController::class, 'generarTraslado']);
     Route::post('/baja/{equipoId}', [\App\Http\Controllers\ActasController::class, 'generarBaja']);
     Route::post('/prestamo/{equipoId}', [\App\Http\Controllers\ActasController::class, 'generarPrestamo']);
     Route::get('/{id}/download', [\App\Http\Controllers\ActasController::class, 'download']);
+});
+
+Route::prefix('auditoria')->middleware(['auth:api', 'role:admin|superadmin', 'capture.ip'])->group(function () {
+    Route::get('/', [\App\Http\Controllers\AuditoriaController::class, 'index']);
+    Route::get('/export/pdf', [\App\Http\Controllers\AuditoriaController::class, 'exportPdf']);
+    Route::get('/export/excel', [\App\Http\Controllers\AuditoriaController::class, 'exportExcel']);
 });

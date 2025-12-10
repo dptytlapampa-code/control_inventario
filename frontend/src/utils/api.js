@@ -135,6 +135,37 @@ let usuarioPermisos = [
   },
 ]
 
+let auditoriaRegistros = [
+  {
+    id: 'aud-001',
+    user_id: 'user-001',
+    user_name: 'Ana SuperAdmin',
+    user_email: 'ana.superadmin@example.com',
+    user_role: 'superadmin',
+    ip_address: '192.168.1.10',
+    accion: 'Configuración de encabezado',
+    modulo: 'Actas',
+    objeto_id: 'enc-001',
+    antes: null,
+    despues: { mime: 'image/png' },
+    created_at: new Date().toISOString(),
+  },
+  {
+    id: 'aud-002',
+    user_id: 'user-001',
+    user_name: 'Ana SuperAdmin',
+    user_email: 'ana.superadmin@example.com',
+    user_role: 'superadmin',
+    ip_address: '192.168.1.10',
+    accion: 'Actualizar permisos',
+    modulo: 'Permisos',
+    objeto_id: 'user-002',
+    antes: null,
+    despues: { total_permisos: 2 },
+    created_at: new Date(Date.now() - 3600 * 1000).toISOString(),
+  },
+]
+
 const clone = (data) => JSON.parse(JSON.stringify(data))
 
 const generateId = (prefix) => `${prefix}-${Math.random().toString(36).slice(2, 8)}`
@@ -667,6 +698,102 @@ export async function downloadActa(id) {
     throw new Error('Acta no encontrada')
   }
   return new Blob([`Acta ${acta.tipo} mock`], { type: 'application/pdf' })
+}
+
+export async function getAuditoria(params = {}) {
+  const query = {
+    ...params,
+  }
+
+  if (API_BASE_URL) {
+    const response = await axios.get(`${API_BASE_URL}/auditoria`, {
+      params: query,
+      headers: buildAuthHeaders(),
+    })
+
+    return response.data
+  }
+
+  await delay()
+  let registros = clone(auditoriaRegistros)
+
+  if (query.user_id) {
+    registros = registros.filter((item) => item.user_id === query.user_id)
+  }
+
+  if (query.modulo) {
+    registros = registros.filter((item) => item.modulo === query.modulo)
+  }
+
+  if (query.accion) {
+    registros = registros.filter((item) => item.accion === query.accion)
+  }
+
+  if (query.desde) {
+    registros = registros.filter((item) => new Date(item.created_at) >= new Date(query.desde))
+  }
+
+  if (query.hasta) {
+    const limite = new Date(query.hasta)
+    limite.setHours(23, 59, 59, 999)
+    registros = registros.filter((item) => new Date(item.created_at) <= limite)
+  }
+
+  if (query.search) {
+    const search = query.search.toLowerCase()
+    registros = registros.filter(
+      (item) =>
+        item.user_name?.toLowerCase().includes(search) ||
+        item.accion?.toLowerCase().includes(search) ||
+        item.modulo?.toLowerCase().includes(search),
+    )
+  }
+
+  const page = Number(query.page) || 1
+  const perPage = Number(query.per_page) || 15
+  const start = (page - 1) * perPage
+  const paginated = registros.slice(start, start + perPage)
+  const lastPage = Math.max(1, Math.ceil(registros.length / perPage))
+
+  return {
+    data: paginated,
+    current_page: page,
+    per_page: perPage,
+    total: registros.length,
+    last_page: lastPage,
+  }
+}
+
+export async function exportAuditoriaPDF(params = {}) {
+  if (API_BASE_URL) {
+    const response = await axios.get(`${API_BASE_URL}/auditoria/export/pdf`, {
+      params,
+      responseType: 'blob',
+      headers: buildAuthHeaders(),
+    })
+
+    return response.data
+  }
+
+  await delay()
+  return new Blob(['Auditoria PDF mock'], { type: 'application/pdf' })
+}
+
+export async function exportAuditoriaExcel(params = {}) {
+  if (API_BASE_URL) {
+    const response = await axios.get(`${API_BASE_URL}/auditoria/export/excel`, {
+      params,
+      responseType: 'blob',
+      headers: buildAuthHeaders(),
+    })
+
+    return response.data
+  }
+
+  await delay()
+  const encabezados = 'ID,Usuario,Acción,Módulo,Fecha\n'
+  const cuerpo = auditoriaRegistros.map((item) => `${item.id},${item.user_name},${item.accion},${item.modulo},${item.created_at}`).join('\n')
+  return new Blob([encabezados + cuerpo], { type: 'text/csv' })
 }
 
 function obtenerTipo(nombre) {

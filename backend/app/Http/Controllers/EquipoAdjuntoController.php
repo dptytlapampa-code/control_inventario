@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreEquipoAdjuntoRequest;
 use App\Models\EquipoAdjunto;
+use App\Services\AuditoriaService;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -35,6 +36,19 @@ class EquipoAdjuntoController extends Controller
             'path' => $path,
         ]);
 
+        AuditoriaService::registrar(
+            'Subir adjunto',
+            'Adjuntos',
+            $adjunto->id,
+            null,
+            [
+                'equipo_id' => $equipoId,
+                'nombre_original' => $adjunto->nombre_original,
+                'mime' => $adjunto->mime,
+                'size' => $adjunto->size,
+            ]
+        );
+
         return response()->json($adjunto, 201);
     }
 
@@ -56,6 +70,18 @@ class EquipoAdjuntoController extends Controller
         if (Storage::disk('public')->exists($adjunto->path)) {
             Storage::disk('public')->delete($adjunto->path);
         }
+
+        AuditoriaService::registrar(
+            'Eliminar adjunto',
+            'Adjuntos',
+            $adjunto->id,
+            [
+                'equipo_id' => $adjunto->equipo_id,
+                'nombre_original' => $adjunto->nombre_original,
+                'mime' => $adjunto->mime,
+            ],
+            null
+        );
 
         $adjunto->delete();
 

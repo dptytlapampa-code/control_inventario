@@ -15,6 +15,7 @@ import EquiposHistorial from './pages/EquiposHistorial'
 import SuperAdminUsuarios from './pages/SuperAdminUsuarios'
 import SuperAdminPermisos from './pages/SuperAdminPermisos'
 import ConfigEncabezadoActas from './pages/ConfigEncabezadoActas'
+import Auditoria from './pages/Auditoria'
 
 function App() {
   return (
@@ -88,6 +89,7 @@ function App() {
             path="administracion/roles-permisos"
             element={<PageTemplate title="Roles y permisos" description="Definición de permisos y perfiles." />}
           />
+          <Route path="sistema/auditoria" element={<Auditoria />} />
           <Route path="superadmin/usuarios" element={<SuperAdminUsuarios />} />
           <Route path="superadmin/usuarios/:userId/permisos" element={<SuperAdminPermisos />} />
           <Route path="superadmin/actas/encabezado" element={<ConfigEncabezadoActas />} />
