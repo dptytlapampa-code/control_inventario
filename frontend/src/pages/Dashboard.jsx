@@ -1,66 +1,162 @@
-import Card from '../components/Card'
+import { useEffect, useMemo, useState } from 'react'
+import { Activity, Building2, Cpu, Layers, Stethoscope, Wrench } from 'lucide-react'
 import EmptyState from '../components/EmptyState'
-
-const kpis = [
-  { title: 'Equipos operativos', value: '128', trend: '+5%' },
-  { title: 'Mantenimientos del mes', value: '23', trend: 'Programados' },
-  { title: 'Alertas abiertas', value: '4', trend: 'Revisar' },
-  { title: 'Servicios activos', value: '18', trend: 'Sin cambios' },
-]
+import Error from '../components/Error'
+import GraficoEquiposPorEstado from '../components/GraficoEquiposPorEstado'
+import GraficoEquiposPorHospital from '../components/GraficoEquiposPorHospital'
+import GraficoEquiposPorTipo from '../components/GraficoEquiposPorTipo'
+import GraficoMantenimientosPorMes from '../components/GraficoMantenimientosPorMes'
+import KpiCard from '../components/KpiCard'
+import Loader from '../components/Loader'
+import { getDashboardKpis, getEquiposPorEstado, getEquiposPorHospital, getEquiposPorTipo, getMantenimientosPorMes } from '../utils/api'
 
 function Dashboard() {
+  const [kpis, setKpis] = useState(null)
+  const [equiposPorTipo, setEquiposPorTipo] = useState([])
+  const [equiposPorEstado, setEquiposPorEstado] = useState([])
+  const [mantenimientosPorMes, setMantenimientosPorMes] = useState([])
+  const [equiposPorHospital, setEquiposPorHospital] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+  const [hasPermission, setHasPermission] = useState(true)
+
+  useEffect(() => {
+    const fetchDashboard = async () => {
+      try {
+        setLoading(true)
+        setError('')
+        const [kpiData, tipoData, estadoData, mantenimientoData, hospitalData] = await Promise.all([
+          getDashboardKpis(),
+          getEquiposPorTipo(),
+          getEquiposPorEstado(),
+          getMantenimientosPorMes(),
+          getEquiposPorHospital(),
+        ])
+        setKpis(kpiData)
+        setEquiposPorTipo(tipoData)
+        setEquiposPorEstado(estadoData)
+        setMantenimientosPorMes(mantenimientoData)
+        setEquiposPorHospital(hospitalData)
+      } catch (err) {
+        const status = err?.response?.status
+        if (status === 403) {
+          setHasPermission(false)
+          setError('No tienes permisos para visualizar el dashboard.')
+        } else {
+          setError('No pudimos cargar la información del dashboard.')
+        }
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchDashboard()
+  }, [])
+
+  const estadoCounts = useMemo(() => {
+    const mapa = Object.entries(kpis?.equipos_por_estado || {}).reduce((acc, [estado, total]) => {
+      acc[estado.toLowerCase()] = total
+      return acc
+    }, {})
+
+    const getValue = (estado) => mapa[estado.toLowerCase()] || 0
+
+    return {
+      operativo: getValue('Operativo'),
+      mantenimiento: getValue('En mantenimiento'),
+      fueraServicio: getValue('Fuera de servicio'),
+      baja: getValue('Dado de baja'),
+    }
+  }, [kpis])
+
+  if (loading) {
+    return (
+      <section className="space-y-4">
+        <div>
+          <h1 className="text-2xl font-semibold text-slate-900">Dashboard</h1>
+          <p className="text-sm text-slate-600 mb-0">Resumen ejecutivo del inventario y mantenimientos.</p>
+        </div>
+        <Loader text="Preparando panel" />
+      </section>
+    )
+  }
+
+  if (!hasPermission) {
+    return (
+      <section className="space-y-4">
+        <div>
+          <h1 className="text-2xl font-semibold text-slate-900">Dashboard</h1>
+          <p className="text-sm text-slate-600 mb-0">Resumen ejecutivo del inventario y mantenimientos.</p>
+        </div>
+        <EmptyState
+          title="Acceso restringido"
+          message="Tu usuario no tiene el permiso dashboard:view. Solicita acceso al administrador para visualizar las métricas."
+        />
+      </section>
+    )
+  }
+
   return (
     <section className="space-y-4">
       <div>
         <h1 className="text-2xl font-semibold text-slate-900">Dashboard</h1>
-        <p className="text-sm text-slate-600">Resumen general del inventario y los mantenimientos.</p>
+        <p className="text-sm text-slate-600 mb-0">Resumen ejecutivo del inventario y mantenimientos.</p>
       </div>
 
-      <div className="row g-3">
-        {kpis.map((kpi) => (
-          <div key={kpi.title} className="col-12 col-md-6 col-xl-3">
-            <div className="card border-0 shadow-sm h-100">
-              <div className="card-body">
-                <p className="text-muted text-uppercase fw-semibold small mb-1">{kpi.title}</p>
-                <div className="d-flex align-items-center justify-content-between">
-                  <span className="fs-3 fw-bold text-secondary">{kpi.value}</span>
-                  <span className="badge text-bg-light border">{kpi.trend}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
+      {error && <Error title="No se pudo cargar" message={error} />}
 
-      <div className="row g-3">
-        <div className="col-12 col-xl-8">
-          <Card title="Rendimiento por hospital">
-            <div className="ratio ratio-16x9 bg-light rounded" style={{ minHeight: 280 }}>
-              <div className="d-flex flex-column align-items-center justify-content-center text-secondary">
-                <span className="fw-semibold">Área para gráfico Nivo (barras / líneas)</span>
-                <small>Integrar datasource real cuando se conecte el backend.</small>
-              </div>
-            </div>
-          </Card>
+      <div className="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4 g-3">
+        <div className="col">
+          <KpiCard title="Total de equipos" value={kpis?.total_equipos ?? 0} icon={Cpu} />
         </div>
-        <div className="col-12 col-xl-4">
-          <Card title="Disponibilidad de equipos">
-            <div className="ratio ratio-1x1 bg-light rounded" style={{ minHeight: 280 }}>
-              <div className="d-flex flex-column align-items-center justify-content-center text-secondary">
-                <span className="fw-semibold">Espacio para gráfico Nivo (donut)</span>
-                <small>Placeholder listo para datos reales.</small>
-              </div>
-            </div>
-          </Card>
+        <div className="col">
+          <KpiCard title="Operativos" value={estadoCounts.operativo} icon={Activity} variant="success" />
+        </div>
+        <div className="col">
+          <KpiCard title="En mantenimiento" value={estadoCounts.mantenimiento} icon={Wrench} variant="warning" />
+        </div>
+        <div className="col">
+          <KpiCard title="Fuera de servicio" value={estadoCounts.fueraServicio} icon={Layers} variant="danger" />
+        </div>
+        <div className="col">
+          <KpiCard title="Dados de baja" value={estadoCounts.baja} icon={Layers} variant="danger" />
+        </div>
+        <div className="col">
+          <KpiCard
+            title="Mantenimientos del mes"
+            value={kpis?.mantenimientos_mes ?? 0}
+            icon={Wrench}
+            variant="info"
+          />
+        </div>
+        <div className="col">
+          <KpiCard title="Hospitales" value={kpis?.total_hospitales ?? 0} icon={Building2} />
+        </div>
+        <div className="col">
+          <KpiCard title="Servicios" value={kpis?.total_servicios ?? 0} icon={Stethoscope} />
+        </div>
+        <div className="col">
+          <KpiCard title="Oficinas" value={kpis?.total_oficinas ?? 0} icon={Layers} />
         </div>
       </div>
 
-      <Card title="Actividades recientes">
-        <EmptyState
-          title="Sin datos en el dashboard"
-          message="Cuando el backend esté conectado, verás la actividad reciente y los tickets de mantenimiento aquí."
-        />
-      </Card>
+      <div className="row g-3">
+        <div className="col-12 col-xl-6">
+          <GraficoEquiposPorTipo data={equiposPorTipo} />
+        </div>
+        <div className="col-12 col-xl-6">
+          <GraficoEquiposPorEstado data={equiposPorEstado} />
+        </div>
+      </div>
+
+      <div className="row g-3">
+        <div className="col-12 col-xl-6">
+          <GraficoMantenimientosPorMes data={mantenimientosPorMes} />
+        </div>
+        <div className="col-12 col-xl-6">
+          <GraficoEquiposPorHospital data={equiposPorHospital} />
+        </div>
+      </div>
     </section>
   )
 }
