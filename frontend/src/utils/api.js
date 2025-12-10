@@ -88,7 +88,17 @@ let historiales = [
   },
 ]
 
-let actas = []
+let actas = [
+  {
+    id: 'act-001',
+    tipo: 'entrega',
+    equipo_id: 'eq1',
+    hospital_id: 'h1',
+    receptor_nombre: 'Carlos Quispe',
+    motivo: 'Entrega inicial de equipo',
+    created_at: '2024-06-10',
+  },
+]
 let encabezadoActa = null
 
 let usuarios = [
@@ -173,6 +183,24 @@ const generateId = (prefix) => `${prefix}-${Math.random().toString(36).slice(2, 
 const buildAuthHeaders = () => {
   const token = localStorage.getItem('token') || localStorage.getItem('authToken')
   return token ? { Authorization: `Bearer ${token}` } : {}
+}
+
+const paginateCollection = (items, params = {}) => {
+  const page = Number(params.page) || 1
+  const perPage = Number(params.per_page) || 10
+  const start = (page - 1) * perPage
+  const data = items.slice(start, start + perPage)
+  const lastPage = Math.max(1, Math.ceil(items.length / perPage))
+
+  return {
+    data,
+    meta: {
+      current_page: page,
+      per_page: perPage,
+      total: items.length,
+      last_page: lastPage,
+    },
+  }
 }
 
 const fetchDashboardResource = async (path) => {
@@ -280,9 +308,46 @@ export async function deleteTipoEquipo(id) {
   return true
 }
 
-export async function getEquipos() {
+export async function getEquipos(params = {}) {
+  if (API_BASE_URL) {
+    const response = await axios.get(`${API_BASE_URL}/equipos`, {
+      params,
+      headers: buildAuthHeaders(),
+    })
+    return response.data
+  }
+
   await delay()
-  return clone(equipos)
+
+  let data = clone(equipos)
+
+  if (params.q) {
+    const search = params.q.toLowerCase()
+    data = data.filter(
+      (item) =>
+        item.nombre.toLowerCase().includes(search) ||
+        item.serie.toLowerCase().includes(search) ||
+        item.bienPatrimonial.toLowerCase().includes(search),
+    )
+  }
+
+  if (params.hospital_id) {
+    data = data.filter((item) => item.hospitalId === params.hospital_id)
+  }
+
+  if (params.servicio_id) {
+    data = data.filter((item) => item.servicioId === params.servicio_id)
+  }
+
+  if (params.oficina_id) {
+    data = data.filter((item) => item.oficinaId === params.oficina_id)
+  }
+
+  if (params.estado) {
+    data = data.filter((item) => item.estado === params.estado)
+  }
+
+  return paginateCollection(data, params)
 }
 
 export async function createEquipo(data) {
@@ -304,9 +369,51 @@ export async function deleteEquipo(id) {
   return true
 }
 
-export async function getMantenimientos() {
+export async function getMantenimientos(params = {}) {
+  if (API_BASE_URL) {
+    const response = await axios.get(`${API_BASE_URL}/mantenimientos`, {
+      params,
+      headers: buildAuthHeaders(),
+    })
+    return response.data
+  }
+
   await delay()
-  return clone(mantenimientos)
+  let data = clone(mantenimientos)
+
+  if (params.hospital_id) {
+    data = data.filter((item) => item.hospitalId === params.hospital_id)
+  }
+
+  if (params.servicio_id) {
+    data = data.filter((item) => item.servicioId === params.servicio_id)
+  }
+
+  if (params.oficina_id) {
+    data = data.filter((item) => item.oficinaId === params.oficina_id)
+  }
+
+  if (params.fecha_desde) {
+    data = data.filter((item) => new Date(item.fecha) >= new Date(params.fecha_desde))
+  }
+
+  if (params.fecha_hasta) {
+    const to = new Date(params.fecha_hasta)
+    to.setHours(23, 59, 59, 999)
+    data = data.filter((item) => new Date(item.fecha) <= to)
+  }
+
+  if (params.q) {
+    const search = params.q.toLowerCase()
+    data = data.filter(
+      (item) =>
+        item.responsable.toLowerCase().includes(search) ||
+        item.tipo.toLowerCase().includes(search) ||
+        item.notas?.toLowerCase().includes(search),
+    )
+  }
+
+  return paginateCollection(data, params)
 }
 
 export async function createMantenimiento(data) {
@@ -326,6 +433,49 @@ export async function deleteMantenimiento(id) {
   await delay()
   mantenimientos = mantenimientos.filter((item) => item.id !== id)
   return true
+}
+
+export async function getActas(params = {}) {
+  if (API_BASE_URL) {
+    const response = await axios.get(`${API_BASE_URL}/actas`, {
+      params,
+      headers: buildAuthHeaders(),
+    })
+    return response.data
+  }
+
+  await delay()
+  let data = clone(actas)
+
+  if (params.q) {
+    const search = params.q.toLowerCase()
+    data = data.filter(
+      (item) =>
+        item.motivo?.toLowerCase().includes(search) ||
+        item.tipo?.toLowerCase().includes(search) ||
+        item.receptor_nombre?.toLowerCase().includes(search),
+    )
+  }
+
+  if (params.hospital_id) {
+    data = data.filter((item) => item.hospital_id === params.hospital_id)
+  }
+
+  if (params.tipo) {
+    data = data.filter((item) => item.tipo === params.tipo)
+  }
+
+  if (params.fecha_desde) {
+    data = data.filter((item) => new Date(item.created_at) >= new Date(params.fecha_desde))
+  }
+
+  if (params.fecha_hasta) {
+    const limite = new Date(params.fecha_hasta)
+    limite.setHours(23, 59, 59, 999)
+    data = data.filter((item) => new Date(item.created_at) <= limite)
+  }
+
+  return paginateCollection(data, params)
 }
 
 export async function getHistorial(equipoId) {
@@ -698,6 +848,134 @@ export async function downloadActa(id) {
     throw new Error('Acta no encontrada')
   }
   return new Blob([`Acta ${acta.tipo} mock`], { type: 'application/pdf' })
+}
+
+export async function searchGlobal(params = {}) {
+  if (API_BASE_URL) {
+    const response = await axios.get(`${API_BASE_URL}/buscador-global`, {
+      params,
+      headers: buildAuthHeaders(),
+    })
+    return response.data
+  }
+
+  await delay()
+  if (!params.q) return { data: [], meta: { current_page: 1, per_page: 10, total: 0, last_page: 1 } }
+
+  const search = params.q.toLowerCase()
+  const modulo = params.modulo || 'all'
+  let results = []
+
+  const includeModule = (target) => modulo === 'all' || modulo === target
+
+  if (includeModule('equipos')) {
+    results = results.concat(
+      equipos
+        .filter((item) =>
+          [item.nombre, item.serie, item.bienPatrimonial].some((value) => value?.toLowerCase().includes(search)),
+        )
+        .map((item) => ({
+          id: item.id,
+          nombre: item.nombre,
+          estado: item.estado,
+          hospital_id: item.hospitalId,
+          servicio_id: item.servicioId,
+          oficina_id: item.oficinaId,
+          tipo: 'equipo',
+        })),
+    )
+  }
+
+  if (includeModule('hospitales')) {
+    results = results.concat(
+      hospitales
+        .filter((item) => item.nombre.toLowerCase().includes(search))
+        .map((item) => ({ id: item.id, nombre: item.nombre, descripcion: item.direccion, tipo: 'hospital' })),
+    )
+  }
+
+  if (includeModule('servicios')) {
+    results = results.concat(
+      servicios
+        .filter((item) => item.nombre.toLowerCase().includes(search))
+        .map((item) => ({
+          id: item.id,
+          nombre: item.nombre,
+          hospital_id: item.hospitalId,
+          descripcion: item.responsable,
+          tipo: 'servicio',
+        })),
+    )
+  }
+
+  if (includeModule('oficinas')) {
+    results = results.concat(
+      oficinas
+        .filter((item) => item.nombre.toLowerCase().includes(search))
+        .map((item) => ({
+          id: item.id,
+          nombre: item.nombre,
+          hospital_id: item.hospitalId,
+          servicio_id: item.servicioId,
+          tipo: 'oficina',
+        })),
+    )
+  }
+
+  if (includeModule('mantenimientos')) {
+    results = results.concat(
+      mantenimientos
+        .filter((item) => item.tipo.toLowerCase().includes(search) || item.responsable.toLowerCase().includes(search))
+        .map((item) => ({
+          id: item.id,
+          nombre: item.tipo,
+          estado: item.responsable,
+          fecha: item.fecha,
+          hospital_id: item.hospitalId,
+          servicio_id: item.servicioId,
+          oficina_id: item.oficinaId,
+          tipo: 'mantenimiento',
+        })),
+    )
+  }
+
+  if (includeModule('actas')) {
+    results = results.concat(
+      actas
+        .filter((item) =>
+          [item.tipo, item.receptor_nombre, item.motivo].some((value) => value?.toLowerCase().includes(search)),
+        )
+        .map((item) => ({
+          id: item.id,
+          nombre: `Acta ${item.tipo}`,
+          estado: item.tipo,
+          hospital_id: item.hospital_id,
+          fecha: item.created_at,
+          descripcion: item.motivo,
+          tipo: 'acta',
+        })),
+    )
+  }
+
+  if (params.hospital_id) {
+    results = results.filter((item) => item.hospital_id === params.hospital_id)
+  }
+
+  if (params.estado_equipo && modulo === 'equipos') {
+    results = results.filter((item) => item.estado === params.estado_equipo)
+  }
+
+  if (params.fecha_desde && ['mantenimientos', 'actas'].includes(modulo)) {
+    results = results.filter((item) => new Date(item.fecha || item.created_at) >= new Date(params.fecha_desde))
+  }
+
+  if (params.fecha_hasta && ['mantenimientos', 'actas'].includes(modulo)) {
+    const limit = new Date(params.fecha_hasta)
+    limit.setHours(23, 59, 59, 999)
+    results = results.filter((item) => new Date(item.fecha || item.created_at) <= limit)
+  }
+
+  return paginateCollection(results, params)
 }
 
 export async function getAuditoria(params = {}) {

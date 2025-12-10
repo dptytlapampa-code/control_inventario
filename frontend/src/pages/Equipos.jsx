@@ -24,7 +24,7 @@ function Equipos() {
       try {
         setLoading(true)
         const [equiposResponse, tiposResponse] = await Promise.all([getEquipos(), getTiposEquipos()])
-        setEquipos(equiposResponse)
+        setEquipos(equiposResponse.data || equiposResponse)
         setTipos(tiposResponse)
       } catch (err) {
         setError('No pudimos cargar los equipos en este momento.')

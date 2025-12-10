@@ -62,8 +62,8 @@ function Mantenimientos() {
         setHospitals(hospitalResponse)
         setServices(serviceResponse)
         setOffices(officeResponse)
-        setEquipments(equipmentResponse)
-        setRecords(maintenanceResponse)
+        setEquipments(equipmentResponse.data || equipmentResponse)
+        setRecords(maintenanceResponse.data || maintenanceResponse)
       } catch (error) {
         setErrorMessage('No pudimos cargar los mantenimientos.')
       } finally {

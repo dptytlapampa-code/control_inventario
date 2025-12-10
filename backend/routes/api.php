@@ -34,6 +34,12 @@ Route::middleware(['auth:keycloak', 'capture.ip'])->group(function () {
     Route::get('/dashboard/equipos-por-hospital', [\App\Http\Controllers\DashboardController::class, 'equiposPorHospital']);
 });
 
+Route::middleware(['auth:api', 'capture.ip'])->group(function () {
+    Route::get('/buscador-global', [\App\Http\Controllers\BuscadorGlobalController::class, '__invoke']);
+    Route::get('/equipos', [\App\Http\Controllers\EquiposController::class, 'index']);
+    Route::get('/mantenimientos', [\App\Http\Controllers\MantenimientosController::class, 'index']);
+});
+
 Route::prefix('superadmin')->middleware(['auth:api', 'role:superadmin', 'capture.ip'])->group(function () {
     Route::get('/usuarios', [\App\Http\Controllers\SuperAdmin\UsuarioPermisoController::class, 'index']);
     Route::get('/usuarios/{id}/permisos', [\App\Http\Controllers\SuperAdmin\UsuarioPermisoController::class, 'show']);
@@ -46,6 +52,7 @@ Route::prefix('superadmin')->middleware(['auth:api', 'role:superadmin', 'capture
 });
 
 Route::prefix('actas')->middleware(['auth:api', 'capture.ip'])->group(function () {
+    Route::get('/', [\App\Http\Controllers\ActasController::class, 'index']);
     Route::post('/entrega/{equipoId}', [\App\Http\Controllers\ActasController::class, 'generarEntrega']);
     Route::post('/traslado/{equipoId}', [\App\Http\Controllers\ActasController::class, 'generarTraslado']);
     Route::post('/baja/{equipoId}', [\App\Http\Controllers\ActasController::class, 'generarBaja']);
