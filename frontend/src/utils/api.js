@@ -62,6 +62,28 @@ let mantenimientos = [
 ]
 
 let adjuntos = []
+let historiales = [
+  {
+    id: 'h1',
+    equipoId: 'eq1',
+    tipoEvento: 'Mantenimiento preventivo',
+    descripcion: 'Limpieza general y revisión de sensores.',
+    fechaEvento: '2024-05-12T10:30',
+    usuarioRegistra: 'superadmin',
+    oficinaOrigenId: 'o1',
+    oficinaDestinoId: 'o2',
+  },
+  {
+    id: 'h2',
+    equipoId: 'eq1',
+    tipoEvento: 'Cambio de estado',
+    descripcion: 'Marcado como operativo luego de pruebas.',
+    fechaEvento: '2024-06-01T09:00',
+    usuarioRegistra: 'superadmin',
+    oficinaOrigenId: 'o2',
+    oficinaDestinoId: '',
+  },
+]
 
 const clone = (data) => JSON.parse(JSON.stringify(data))
 
@@ -211,6 +233,55 @@ export async function updateMantenimiento(id, data) {
 export async function deleteMantenimiento(id) {
   await delay()
   mantenimientos = mantenimientos.filter((item) => item.id !== id)
+  return true
+}
+
+export async function getHistorial(equipoId) {
+  await delay()
+  return historiales
+    .filter((item) => item.equipoId === equipoId)
+    .sort((a, b) => new Date(b.fechaEvento) - new Date(a.fechaEvento))
+    .map((item) => ({ ...item }))
+}
+
+export async function createHistorial(equipoId, data) {
+  await delay()
+  const nuevo = {
+    id: generateId('hist'),
+    equipoId,
+    tipoEvento: data.tipoEvento,
+    descripcion: data.descripcion || '',
+    fechaEvento: data.fechaEvento,
+    usuarioRegistra: 'superadmin',
+    oficinaOrigenId: data.oficinaOrigenId || '',
+    oficinaDestinoId: data.oficinaDestinoId || '',
+  }
+  historiales = [nuevo, ...historiales]
+  return { ...nuevo }
+}
+
+export async function updateHistorial(id, data) {
+  await delay()
+  historiales = historiales.map((item) =>
+    item.id === id
+      ? {
+          ...item,
+          tipoEvento: data.tipoEvento,
+          descripcion: data.descripcion || '',
+          fechaEvento: data.fechaEvento,
+          oficinaOrigenId: data.oficinaOrigenId || '',
+          oficinaDestinoId: data.oficinaDestinoId || '',
+        }
+      : item,
+  )
+
+  const updated = historiales.find((item) => item.id === id)
+  return { ...updated }
+}
+
+export async function deleteHistorial(id) {
+  await delay()
+  historiales = historiales.filter((item) => item.id !== id)
   return true
 }
 
