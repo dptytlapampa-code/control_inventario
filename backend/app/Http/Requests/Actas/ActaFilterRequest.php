@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Actas;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class ActaFilterRequest extends FormRequest
 {
@@ -15,8 +16,8 @@ class ActaFilterRequest extends FormRequest
     {
         return [
             'q' => 'nullable|string|max:255',
-            'hospital_id' => 'nullable|string',
-            'tipo' => 'nullable|string',
+            'hospital_id' => 'nullable|uuid|exists:instituciones,id',
+            'tipo' => ['nullable', 'string', Rule::in(['entrega', 'traslado', 'baja', 'prestamo'])],
             'fecha_desde' => 'nullable|date',
             'fecha_hasta' => 'nullable|date',
             'page' => 'nullable|integer|min:1',

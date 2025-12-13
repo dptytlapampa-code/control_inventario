@@ -19,14 +19,18 @@ return new class extends Migration
             $table->string('estado')->default('pendiente');
             $table->date('fecha');
             $table->decimal('costo', 12, 2)->nullable();
+            $table->uuid('created_by')->nullable();
             $table->timestamps();
+            $table->softDeletes();
 
-            $table->foreign('equipo_id')->references('id')->on('equipos');
-            $table->foreign('hospital_id')->references('id')->on('instituciones');
-            $table->foreign('servicio_id')->references('id')->on('unidades_organizacionales');
-            $table->foreign('oficina_id')->references('id')->on('unidades_organizacionales');
+            $table->foreign('equipo_id')->references('id')->on('equipos')->cascadeOnDelete();
+            $table->foreign('hospital_id')->references('id')->on('instituciones')->cascadeOnDelete();
+            $table->foreign('servicio_id')->references('id')->on('unidades_organizacionales')->nullOnDelete();
+            $table->foreign('oficina_id')->references('id')->on('unidades_organizacionales')->nullOnDelete();
+
             $table->index(['hospital_id', 'estado']);
             $table->index('fecha');
+            $table->index('created_by');
         });
     }
 

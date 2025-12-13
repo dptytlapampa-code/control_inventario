@@ -18,12 +18,16 @@ return new class extends Migration
             $table->uuid('oficina_id')->nullable();
             $table->string('estado')->default('activo');
             $table->text('descripcion')->nullable();
+            $table->uuid('created_by')->nullable();
             $table->timestamps();
+            $table->softDeletes();
 
-            $table->foreign('hospital_id')->references('id')->on('instituciones');
-            $table->foreign('servicio_id')->references('id')->on('unidades_organizacionales');
-            $table->foreign('oficina_id')->references('id')->on('unidades_organizacionales');
+            $table->foreign('hospital_id')->references('id')->on('instituciones')->cascadeOnDelete();
+            $table->foreign('servicio_id')->references('id')->on('unidades_organizacionales')->nullOnDelete();
+            $table->foreign('oficina_id')->references('id')->on('unidades_organizacionales')->nullOnDelete();
+
             $table->index(['hospital_id', 'estado']);
+            $table->index('created_by');
         });
     }
 
