@@ -2,6 +2,9 @@
 
 namespace App\Http\Resources\Mantenimientos;
 
+use App\Http\Resources\Equipos\EquipoResource;
+use App\Http\Resources\InstitucionResource;
+use App\Http\Resources\UnidadOrganizacionalResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -20,8 +23,14 @@ class MantenimientoResource extends JsonResource
             'estado' => $this->estado,
             'fecha' => $this->fecha,
             'costo' => $this->costo ?? null,
+            'created_by' => $this->created_by,
+            'equipo' => new EquipoResource($this->whenLoaded('equipo')),
+            'hospital' => new InstitucionResource($this->whenLoaded('hospital')),
+            'servicio' => new UnidadOrganizacionalResource($this->whenLoaded('servicio')),
+            'oficina' => new UnidadOrganizacionalResource($this->whenLoaded('oficina')),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
+            'deleted_at' => $this->deleted_at,
         ];
     }
 }

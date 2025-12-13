@@ -34,12 +34,6 @@ Route::middleware(['auth:keycloak', 'capture.ip'])->group(function () {
     Route::get('/dashboard/equipos-por-hospital', [\App\Http\Controllers\DashboardController::class, 'equiposPorHospital']);
 });
 
-Route::middleware(['auth:api', 'capture.ip'])->group(function () {
-    Route::get('/buscador-global', [\App\Http\Controllers\BuscadorGlobalController::class, '__invoke']);
-    Route::get('/equipos', [\App\Http\Controllers\EquiposController::class, 'index']);
-    Route::get('/mantenimientos', [\App\Http\Controllers\MantenimientosController::class, 'index']);
-});
-
 Route::prefix('export')->middleware(['auth:api', 'role:admin|superadmin', 'capture.ip'])->group(function () {
     Route::get('/equipos', [\App\Http\Controllers\ExportacionesController::class, 'exportEquipos']);
     Route::get('/mantenimientos', [\App\Http\Controllers\ExportacionesController::class, 'exportMantenimientos']);
@@ -64,13 +58,11 @@ Route::prefix('superadmin')->middleware(['auth:api', 'role:superadmin', 'capture
     Route::delete('/encabezado-actas', [\App\Http\Controllers\SuperAdmin\EncabezadoActaController::class, 'destroy']);
 });
 
-Route::prefix('actas')->middleware(['auth:api', 'capture.ip'])->group(function () {
-    Route::get('/', [\App\Http\Controllers\ActasController::class, 'index']);
-    Route::post('/entrega/{equipoId}', [\App\Http\Controllers\ActasController::class, 'generarEntrega']);
-    Route::post('/traslado/{equipoId}', [\App\Http\Controllers\ActasController::class, 'generarTraslado']);
-    Route::post('/baja/{equipoId}', [\App\Http\Controllers\ActasController::class, 'generarBaja']);
-    Route::post('/prestamo/{equipoId}', [\App\Http\Controllers\ActasController::class, 'generarPrestamo']);
-    Route::get('/{id}/download', [\App\Http\Controllers\ActasController::class, 'download']);
+Route::middleware(['auth:api', 'capture.ip'])->group(function () {
+    Route::get('/buscador-global', [\App\Http\Controllers\BuscadorGlobalController::class, '__invoke']);
+    Route::apiResource('equipos', \App\Http\Controllers\EquiposController::class);
+    Route::apiResource('mantenimientos', \App\Http\Controllers\MantenimientosController::class);
+    Route::apiResource('actas', \App\Http\Controllers\ActasController::class);
 });
 
 Route::prefix('auditoria')->middleware(['auth:api', 'role:admin|superadmin', 'capture.ip'])->group(function () {
