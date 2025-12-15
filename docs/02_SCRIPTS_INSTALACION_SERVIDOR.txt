@@ -161,3 +161,54 @@ NOTAS FINALES
 - Reiniciar la sesión SSH tras modificar grupos.
 - Adaptar variables (.env, dominios, puertos) según el entorno.
 - Registrar cambios relevantes en README.md y en los archivos de docs/.
+=======
+SCRIPTS DE INSTALACIÓN - UBUNTU SERVER
+==================================================
+
+SCRIPT 1 - ACTUALIZAR SISTEMA
+----------------------------
+sudo apt update && sudo apt upgrade -y
+
+SCRIPT 2 - DEPENDENCIAS BÁSICAS
+------------------------------
+sudo apt install -y ca-certificates curl gnupg lsb-release unzip software-properties-common
+
+SCRIPT 3 - INSTALAR GIT
+----------------------
+sudo apt install -y git
+
+SCRIPT 4 - INSTALAR DOCKER
+-------------------------
+curl -fsSL https://get.docker.com | sudo bash
+sudo systemctl enable docker
+sudo systemctl start docker
+sudo usermod -aG docker $USER
+
+SCRIPT 5 - INSTALAR DOCKER COMPOSE
+---------------------------------
+sudo apt install -y docker-compose-plugin
+
+SCRIPT 6 - CREAR ESTRUCTURA DE CARPETAS
+--------------------------------------
+sudo mkdir -p /opt/control_inventario
+sudo chown -R $USER:$USER /opt/control_inventario
+
+SCRIPT 7 - CLONAR REPOSITORIO
+----------------------------
+git clone https://github.com/dptytlapampa-code/control_inventario.git /opt/control_inventario
+
+SCRIPT 8 - LEVANTAR SERVICIOS
+----------------------------
+docker compose down
+docker compose up -d --build
+
+SCRIPT 9 - ACTUALIZAR PRODUCCIÓN
+-------------------------------
+git pull origin main
+docker compose down
+docker compose up -d --build
+
+==================================================
+FIN DEL DOCUMENTO
+==================================================
+
