@@ -1,0 +1,163 @@
+==================================================
+SCRIPTS DE INSTALACIÓN Y OPERACIÓN - PROYECTO CONTROL_INVENTARIO
+==================================================
+
+OBJETIVO
+--------
+Este documento reúne scripts de apoyo para automatizar la preparación
+del servidor, la instalación de Docker/Docker Compose y el despliegue
+del proyecto control_inventario en Ubuntu.
+
+USO GENERAL
+-----------
+- Ejecutar cada script con un usuario con permisos sudo (no como root).
+- Guardar los scripts en la carpeta `infra/scripts/` dentro del proyecto.
+- Dar permisos de ejecución: `chmod +x *.sh`.
+
+--------------------------------------------------
+1) SCRIPT: instalar_dependencias.sh
+--------------------------------------------------
+Instala paquetes base, Docker Engine y Docker Compose Plugin.
+
+```bash
+#!/usr/bin/env bash
+set -euo pipefail
+
+sudo apt-get update
+sudo apt-get install -y ca-certificates curl gnupg lsb-release
+
+# Repositorio oficial de Docker
+sudo install -m 0755 -d /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+
+echo \
+  "deb [arch=\$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \$(lsb_release -cs) stable" | \
+  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+sudo apt-get update
+sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+# Habilitar y agregar usuario actual al grupo docker
+sudo systemctl enable --now docker
+sudo usermod -aG docker "${USER}"
+```
+
+--------------------------------------------------
+2) SCRIPT: preparar_estructura.sh
+--------------------------------------------------
+Crea la estructura recomendada y clona el repositorio.
+
+```bash
+#!/usr/bin/env bash
+set -euo pipefail
+
+BASE_DIR=/opt/control_inventario
+REPO_URL="git@github.com:ORGANIZACION/control_inventario.git"  # Ajustar según origen
+
+sudo mkdir -p "$BASE_DIR"
+sudo chown -R "$USER":"$USER" "$BASE_DIR"
+
+cd "$BASE_DIR"
+git clone "$REPO_URL" .
+
+# Crear carpetas auxiliares si no existen
+mkdir -p backend frontend keycloak infra/nginx infra/scripts docs
+```
+
+--------------------------------------------------
+3) SCRIPT: configurar_entorno.sh
+--------------------------------------------------
+Ejemplo para preparar el archivo `.env` de Docker Compose.
+
+```bash
+#!/usr/bin/env bash
+set -euo pipefail
+
+cd /opt/control_inventario
+
+# Copiar plantillas de variables si existen
+[ -f .env.example ] && cp .env.example .env
+[ -f infra/.env.example ] && cp infra/.env.example infra/.env
+
+# Editar variables críticas
+sed -i "s/POSTGRES_PASSWORD=.*/POSTGRES_PASSWORD=contraseña_segura/" .env || true
+sed -i "s/KEYCLOAK_ADMIN_PASSWORD=.*/KEYCLOAK_ADMIN_PASSWORD=admin_seguro/" .env || true
+```
+
+--------------------------------------------------
+4) SCRIPT: desplegar_contenedores.sh
+--------------------------------------------------
+Construye y levanta servicios definidos en `docker-compose.yml`.
+
+```bash
+#!/usr/bin/env bash
+set -euo pipefail
+
+cd /opt/control_inventario
+
+# Construir imágenes y levantar en segundo plano
+DOCKER_COMPOSE="docker compose"
+$DOCKER_COMPOSE pull
+$DOCKER_COMPOSE build
+$DOCKER_COMPOSE up -d
+
+# Mostrar estado
+$DOCKER_COMPOSE ps
+```
+
+--------------------------------------------------
+5) SCRIPT: actualizar_sistema.sh
+--------------------------------------------------
+Actualiza código, reconstruye y reinicia contenedores.
+
+```bash
+#!/usr/bin/env bash
+set -euo pipefail
+
+cd /opt/control_inventario
+git pull origin main
+
+docker compose down
+docker compose up -d --build
+```
+
+--------------------------------------------------
+6) SCRIPT OPCIONAL: servicio_systemd_compose.sh
+--------------------------------------------------
+Crea un servicio systemd para garantizar que Docker Compose se levante
+tras reinicios del servidor.
+
+```bash
+#!/usr/bin/env bash
+set -euo pipefail
+
+SERVICE_FILE=/etc/systemd/system/control_inventario.service
+cat <<'UNIT' | sudo tee "$SERVICE_FILE" > /dev/null
+[Unit]
+Description=Control Inventario - Docker Compose
+Requires=docker.service
+After=docker.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=true
+WorkingDirectory=/opt/control_inventario
+ExecStart=/usr/bin/docker compose up -d
+ExecStop=/usr/bin/docker compose down
+TimeoutStartSec=0
+
+[Install]
+WantedBy=multi-user.target
+UNIT
+
+sudo systemctl daemon-reload
+sudo systemctl enable --now control_inventario.service
+```
+
+--------------------------------------------------
+NOTAS FINALES
+--------------------------------------------------
+- Verificar que el usuario pertenezca al grupo docker antes de ejecutar los scripts.
+- Reiniciar la sesión SSH tras modificar grupos.
+- Adaptar variables (.env, dominios, puertos) según el entorno.
+- Registrar cambios relevantes en README.md y en los archivos de docs/.

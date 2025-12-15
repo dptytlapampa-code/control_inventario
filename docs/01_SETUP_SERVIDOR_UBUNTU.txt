@@ -1,0 +1,94 @@
+==================================================
+SETUP DE SERVIDOR UBUNTU - PROYECTO CONTROL_INVENTARIO
+==================================================
+
+OBJETIVO
+--------
+Este documento describe paso a paso cómo preparar un servidor Ubuntu
+desde cero para ejecutar el proyecto usando Docker y Docker Compose.
+
+Está pensado para:
+- Servidor limpio (Ubuntu Server)
+- Sin dependencias previas
+- Despliegue reproducible
+
+--------------------------------------------------
+1) REQUISITOS DEL SISTEMA
+--------------------------------------------------
+
+Sistema Operativo:
+- Ubuntu Server 20.04 LTS o superior (22.04 recomendado)
+
+Usuario:
+- Usuario con permisos sudo
+- NO trabajar como root directamente
+
+Conectividad:
+- Acceso a internet
+- Acceso SSH
+
+--------------------------------------------------
+2) ESTRUCTURA RECOMENDADA DE CARPETAS
+--------------------------------------------------
+
+/opt/control_inventario/
+├── backend/
+├── frontend/
+├── keycloak/
+├── infra/
+│   ├── docker-compose.yml
+│   ├── nginx/
+│   └── scripts/
+├── README.md
+└── docs/
+
+--------------------------------------------------
+3) TECNOLOGÍAS UTILIZADAS
+--------------------------------------------------
+
+- Git
+- Docker
+- Docker Compose
+- Nginx
+- PostgreSQL
+- Redis
+- Keycloak
+- Backend: Laravel / PHP
+- Frontend: según implementación
+
+--------------------------------------------------
+4) ARCHIVOS CLAVE DEL PROYECTO
+--------------------------------------------------
+
+docker-compose.yml
+Dockerfile
+.env
+README.md
+
+--------------------------------------------------
+5) FLUJO GENERAL DE DESPLIEGUE
+--------------------------------------------------
+
+1. Preparar servidor
+2. Clonar repositorio
+3. Configurar variables de entorno
+4. Construir contenedores
+5. Levantar servicios
+6. Verificar funcionamiento
+
+--------------------------------------------------
+6) BUENAS PRÁCTICAS
+--------------------------------------------------
+
+- No desarrollar directamente en main
+- Usar ramas
+- No editar producción manualmente
+- Actualizar siempre con git pull
+
+--------------------------------------------------
+7) ACTUALIZACIÓN DEL SISTEMA
+--------------------------------------------------
+
+git pull origin main
+docker compose down
+docker compose up -d --build
