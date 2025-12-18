@@ -10,7 +10,7 @@ services:
     restart: always
     volumes:
       - ./backend:/var/www/backend
-      - ./storage:/var/www/storage
+      - ./backend/storage:/var/www/backend/storage
     depends_on:
       - postgres
       - redis

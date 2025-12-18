@@ -11,7 +11,12 @@ class KeycloakRoleMiddleware
     {
         $user = auth()->user();
 
-        if (!$user || !in_array($role, $user->roles ?? [])) {
+        $requiredRoles = array_filter(explode('|', $role));
+        $userRoles = $user->roles ?? [];
+
+        $hasRole = !empty(array_intersect($requiredRoles, $userRoles));
+
+        if (!$user || !$hasRole) {
             return response()->json(['error' => 'Forbidden'], 403);
         }
 

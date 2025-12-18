@@ -7,6 +7,9 @@ use Illuminate\Contracts\Auth\Authenticatable;
 use Lcobucci\JWT\Configuration;
 use Lcobucci\JWT\UnencryptedToken;
 use GuzzleHttp\Client;
+use Lcobucci\Clock\SystemClock;
+use Lcobucci\JWT\Validation\Constraint\SignedWith;
+use Lcobucci\JWT\Validation\Constraint\StrictValidAt;
 
 class KeycloakGuard implements Guard
 {
@@ -23,6 +26,11 @@ class KeycloakGuard implements Guard
             \Lcobucci\JWT\Signer\Key\InMemory::plainText(''),
             \Lcobucci\JWT\Signer\Key\InMemory::plainText($this->getPublicKey())
         );
+
+        $this->jwtConfig->setValidationConstraints(
+            new SignedWith($this->jwtConfig->signer(), $this->jwtConfig->verificationKey()),
+            new StrictValidAt(new SystemClock(new \DateTimeZone('UTC')))
+        );
     }
 
     /**
@@ -31,7 +39,9 @@ class KeycloakGuard implements Guard
     protected function getPublicKey()
     {
         $client = new Client();
-        $url = $this->config['auth_server_url'] . "/realms/" . $this->config['realm'] . "/protocol/openid-connect/certs";
+        $baseUrl = rtrim($this->config['auth_server_url'] ?? '', '/');
+        $realm = $this->config['realm'] ?? '';
+        $url = "{$baseUrl}/realms/{$realm}/protocol/openid-connect/certs";
 
         $response = $client->get($url);
         $certs = json_decode($response->getBody()->getContents(), true);
@@ -118,4 +128,3 @@ class KeycloakGuard implements Guard
         $this->user = $user;
     }
 }
-
