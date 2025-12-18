@@ -1,5 +1,7 @@
 <?php
 
+Route::get('/health', fn () => response()->json(['status' => 'ok']));
+
 Route::middleware(['auth:keycloak', 'role:superadmin', 'capture.ip'])->group(function () {
     Route::get('/tipos-institucion', [\App\Http\Controllers\TipoInstitucionController::class, 'index']);
     Route::post('/tipos-institucion', [\App\Http\Controllers\TipoInstitucionController::class, 'store']);
@@ -34,7 +36,7 @@ Route::middleware(['auth:keycloak', 'capture.ip'])->group(function () {
     Route::get('/dashboard/equipos-por-hospital', [\App\Http\Controllers\DashboardController::class, 'equiposPorHospital']);
 });
 
-Route::prefix('export')->middleware(['auth:api', 'role:admin|superadmin', 'capture.ip'])->group(function () {
+Route::prefix('export')->middleware(['auth:keycloak', 'role:admin|superadmin', 'capture.ip'])->group(function () {
     Route::get('/equipos', [\App\Http\Controllers\ExportacionesController::class, 'exportEquipos']);
     Route::get('/mantenimientos', [\App\Http\Controllers\ExportacionesController::class, 'exportMantenimientos']);
     Route::get('/historial', [\App\Http\Controllers\ExportacionesController::class, 'exportHistorial']);
@@ -47,7 +49,7 @@ Route::prefix('export')->middleware(['auth:api', 'role:admin|superadmin', 'captu
     Route::get('/tipos-equipos', [\App\Http\Controllers\ExportacionesController::class, 'exportTiposEquipos']);
 });
 
-Route::prefix('superadmin')->middleware(['auth:api', 'role:superadmin', 'capture.ip'])->group(function () {
+Route::prefix('superadmin')->middleware(['auth:keycloak', 'role:superadmin', 'capture.ip'])->group(function () {
     Route::get('/usuarios', [\App\Http\Controllers\SuperAdmin\UsuarioPermisoController::class, 'index']);
     Route::get('/usuarios/{id}/permisos', [\App\Http\Controllers\SuperAdmin\UsuarioPermisoController::class, 'show']);
     Route::post('/usuarios/{id}/permisos', [\App\Http\Controllers\SuperAdmin\UsuarioPermisoController::class, 'store']);
@@ -58,14 +60,14 @@ Route::prefix('superadmin')->middleware(['auth:api', 'role:superadmin', 'capture
     Route::delete('/encabezado-actas', [\App\Http\Controllers\SuperAdmin\EncabezadoActaController::class, 'destroy']);
 });
 
-Route::middleware(['auth:api', 'capture.ip'])->group(function () {
+Route::middleware(['auth:keycloak', 'capture.ip'])->group(function () {
     Route::get('/buscador-global', [\App\Http\Controllers\BuscadorGlobalController::class, '__invoke']);
     Route::apiResource('equipos', \App\Http\Controllers\EquiposController::class);
     Route::apiResource('mantenimientos', \App\Http\Controllers\MantenimientosController::class);
     Route::apiResource('actas', \App\Http\Controllers\ActasController::class);
 });
 
-Route::prefix('auditoria')->middleware(['auth:api', 'role:admin|superadmin', 'capture.ip'])->group(function () {
+Route::prefix('auditoria')->middleware(['auth:keycloak', 'role:admin|superadmin', 'capture.ip'])->group(function () {
     Route::get('/', [\App\Http\Controllers\AuditoriaController::class, 'index']);
     Route::get('/export/pdf', [\App\Http\Controllers\AuditoriaController::class, 'exportPdf']);
     Route::get('/export/excel', [\App\Http\Controllers\AuditoriaController::class, 'exportExcel']);
