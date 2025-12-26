@@ -69,6 +69,14 @@ Route::middleware(['auth:keycloak', 'capture.ip'])->group(function () {
 
 Route::prefix('auditoria')->middleware(['auth:keycloak', 'role:admin|superadmin', 'capture.ip'])->group(function () {
     Route::get('/', [\App\Http\Controllers\AuditoriaController::class, 'index']);
-    Route::get('/export/pdf', [\App\Http\Controllers\AuditoriaController::class, 'exportPdf']);
-    Route::get('/export/excel', [\App\Http\Controllers\AuditoriaController::class, 'exportExcel']);
+    Route::get('/export/pdf', function () {
+        return response()->json([
+            'message' => 'Exportaciones de auditoría no están habilitadas en esta fase.'
+        ], 501);
+    });
+    Route::get('/export/excel', function () {
+        return response()->json([
+            'message' => 'Exportaciones de auditoría no están habilitadas en esta fase.'
+        ], 501);
+    });
 });
