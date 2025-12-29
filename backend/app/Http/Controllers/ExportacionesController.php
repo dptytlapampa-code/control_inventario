@@ -60,7 +60,7 @@ class ExportacionesController extends Controller
     private function notImplemented()
     {
         return response()->json([
-            'message' => 'Exportaciones no están habilitadas en esta fase.'
+            'message' => 'Exportaciones deshabilitadas temporalmente'
         ], Response::HTTP_NOT_IMPLEMENTED);
     }
 }
