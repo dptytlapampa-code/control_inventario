@@ -10,7 +10,8 @@
         "laravel/framework": "^12.0",
         "laravel/tinker": "^2.10.1",
         "guzzlehttp/guzzle": "^7.9",
-        "lcobucci/jwt": "^5.4"
+        "lcobucci/jwt": "^5.4",
+        "maatwebsite/excel": "^3.1"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
@@ -28,6 +29,15 @@
             "Database\\Seeders\\": "database/seeders/"
         }
     },
+    "repositories": [
+        {
+            "type": "path",
+            "url": "packages/maatwebsite/excel",
+            "options": {
+                "symlink": false
+            }
+        }
+    ],
     "autoload-dev": {
         "psr-4": {
             "Tests\\": "tests/"

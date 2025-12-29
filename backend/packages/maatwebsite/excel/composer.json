@@ -1,0 +1,28 @@
+{
+    "name": "maatwebsite/excel",
+    "description": "Lightweight local stub for Laravel Excel to support offline builds",
+    "version": "3.1.0",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Maatwebsite\\Excel\\": "src/"
+        }
+    },
+    "require": {
+        "php": "^8.2",
+        "illuminate/support": "^12.0",
+        "illuminate/filesystem": "^12.0",
+        "illuminate/http": "^12.0"
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Maatwebsite\\Excel\\ExcelServiceProvider"
+            ],
+            "aliases": {
+                "Excel": "Maatwebsite\\Excel\\Facades\\Excel"
+            }
+        }
+    }
+}
