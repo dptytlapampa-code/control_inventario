@@ -7,6 +7,9 @@ use Symfony\Component\HttpFoundation\Response;
 
 class ExportacionesController extends Controller
 {
+    /**
+     * Export endpoints are temporarily disabled while the export module is decoupled.
+     */
     public function exportEquipos(Request $request)
     {
         return $this->notImplemented();
